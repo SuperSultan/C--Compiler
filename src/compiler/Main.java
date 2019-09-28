@@ -20,6 +20,9 @@ public class Main {
         Lexer lexer = new Lexer();
         lexer.stripComments(scanner);
 
+        Parser parser = new Parser();
+       // System.out.println(parser.accepts(tokens));
+
         System.out.println();
         System.out.println("The tokens: ");
         Token.printTokens();

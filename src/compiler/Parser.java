@@ -1,9 +1,10 @@
 package compiler;
 
-import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 
 public class Parser {
+
+    private boolean isAccept = true;
     private static ArrayDeque<Token> tokens;
 
     public Parser () {
@@ -39,9 +40,7 @@ public class Parser {
     //var_declaration -> type-specifier ID var-declaration'
     public void var_declaration() {
         type_specifier();
-        if (tokens.removeFirst().category.equals("ID") ) {
-            var_declaration_prime();
-        }
+        if (tokens.removeFirst().category.equals("ID") ) var_declaration_prime();
     }
 
     //var-declaration' -> ; | [ NUM ] ;
@@ -50,7 +49,7 @@ public class Parser {
         else if ( tokens.removeFirst().equals("[") ) {
             if ( tokens.removeFirst().category.equals("NUM") ) {
                 if ( tokens.removeFirst().category.equals("]") ) {
-                    if ( tokens.removeFirst().equals(";") ) { return; }
+                    if ( tokens.removeFirst().equals(";") ) return;
                 }
             }
         }
@@ -66,17 +65,15 @@ public class Parser {
         if ( tokens.removeFirst().category.equals("NUM") ) {
             if ( tokens.removeFirst().equals("(") ) {
                 params();
-                if ( tokens.removeFirst().equals(")") ) {
-                    compound_statement();
-                }
+                if ( tokens.removeFirst().equals(")") ) compound_statement();
             }
         }
     }
 
     //params -> param-list | void
     public void params() {
-        if ( tokens.removeFirst().equals("void") ) { return; }
-        else { param_list(); }
+        if ( tokens.removeFirst().equals("void") ) return;
+        else param_list();
     }
 
     //params_list -> param params-list`
@@ -96,14 +93,14 @@ public class Parser {
     //param -> int ID param` | void ID param'
     public void param() {
         if ( tokens.removeFirst().category.equals("NUM") ) {
-            if ( tokens.removeFirst().category.equals("ID") ) { param_prime(); }
+            if ( tokens.removeFirst().category.equals("ID") ) param_prime();
         }
     }
 
     // param_prime -> "[" "]" | empty
     public void param_prime() {
         if ( tokens.removeFirst().equals("[") ) {
-            if ( tokens.removeFirst().equals("]") ) { return; }
+            if ( tokens.removeFirst().equals("]") ) return;
         } else return;
     }
 
@@ -112,7 +109,7 @@ public class Parser {
          if ( tokens.removeFirst().equals("{") ) {
              local_declarations();
              statement_list();
-             if ( tokens.removeFirst().equals("}") ) { return; }
+             if ( tokens.removeFirst().equals("}") ) return;
          }
     }
 
@@ -123,7 +120,7 @@ public class Parser {
 
     // local-declarations_prime -> var-declaration local-declarations_prime | empty
     public void local_declarations_prime() {
-        if ( tokens.removeFirst().equals("") ) { return; }
+        if ( tokens.removeFirst().equals("") ) return;
         else {
             var_declaration();
             local_declarations_prime();
@@ -135,7 +132,7 @@ public class Parser {
 
     // statement_list_prime -> statement statement_list | empty
     public void statement_list_prime() {
-        if ( tokens.removeFirst().equals("") ) { return; }
+        if ( tokens.removeFirst().equals("") ) return;
         else {
             statement();
             statement_list();
@@ -148,32 +145,21 @@ public class Parser {
          if ( tokens.removeFirst().equals("{") ) {
              local_declarations();
              statement_list();
-             if ( tokens.removeFirst().equals("}") ) { return true; }
+             if ( tokens.removeFirst().equals("}") ) return true;
          }
-         if ( expression_statement() ) {
-             return true;
-         }
-         if ( selection_statement() ) {
-             return true;
-         }
-         if ( iteration_statement() ) {
-             return true;
-         }
-         if ( return_statement() ) {
-             return true;
-         }
+         if ( expression_statement() ) return true;
+         if ( selection_statement() ) return true;
+         if ( iteration_statement() ) return true;
+         if ( return_statement() ) return true;
          return false;
     }
 
     // expression_statement -> expression ";" | ";"
     public boolean expression_statement() {
-         if ( tokens.removeFirst().equals(";")) {
-             return true;
-         } else {
+         if ( tokens.removeFirst().equals(";")) { return true; }
+         else {
             expression();
-            if ( tokens.removeFirst().equals(";") ) {
-                return true;
-            }
+            if ( tokens.removeFirst().equals(";") ) return true;
          }
          return false;
     }
@@ -195,11 +181,8 @@ public class Parser {
 
     // selection_statement_prime -> empty | "else" statement
     public void selection_statement_prime() {
-        if ( tokens.removeFirst().equals("") ) {
-            return;
-        } else if ( tokens.removeFirst().equals("else") ) {
-            return;
-        }
+        if ( tokens.removeFirst().equals("") ) return;
+        else if ( tokens.removeFirst().equals("else") ) return;
     }
 
     //iteration-statement -> "while" "(" expression ")" statement
