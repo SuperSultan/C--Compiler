@@ -18,18 +18,22 @@ public class Main {
         while ( printer.hasNext() ) { System.out.println(printer.nextLine()); } // print source code
 
         Lexer lexer = new Lexer();
-        lexer.stripComments(scanner);
+        Scanner removedComments = lexer.stripComments(scanner); // return a scanner without comments
+
+        Token token = new Token();
+
+        while ( removedComments.hasNext() ) {
+            lexer.addTokens(token, removedComments.nextLine()); // add each token from each line
+        }
 
         System.out.println();
         System.out.println("The tokens: ");
-        Token.printTokens();
+        token.printTokens();
 
-        Token tokens = new Token();
-        tokens.getTokenList();
-
-        Parser parser = new Parser();
+        Parser parser = new Parser(token);
         System.out.println();
-        System.out.println(parser.isAccepted(tokens) ? "ACCEPT" : "REJECT");
+        parser.isLexicallyCorrect(token);
+        System.out.println(parser.isAccepted(token) ? "ACCEPT" : "REJECT");
     }
 
 }

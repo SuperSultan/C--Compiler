@@ -1,20 +1,19 @@
 package compiler;
 
 import java.lang.String;
+import java.util.ArrayDeque;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Lexer {
 
-    public void stripComments(Scanner scanner) {
+    public Scanner stripComments(Scanner scanner) {
 
         boolean comment_mode = false;
         String complete_block_comment = "(\\/\\*).*(\\*\\/)|(\\/\\*).*";
         String incomplete_block_comment = "(\\/\\*).*";
         String closing_block_comment = "^(.*?)(\\*\\/)";
-
-        Lexer lexer = new Lexer();
 
         while ( scanner.hasNext() ) {
             String line = scanner.nextLine().trim();
@@ -33,12 +32,11 @@ public class Lexer {
                 line = line.replaceAll(incomplete_block_comment, "");
                 comment_mode = true;
             }
-            lexer.getTokens(line); // powered by regex
         }
-
+        return scanner;
     } //stripComments
 
-    public void getTokens(String str) {
+    public Token addTokens(Token tokens, String str) {
 
         String keyword = "\\b(?:else|if|int|return|void|while)\\b";
         String identifier = "\\b[a-zA-Z]+\\b";
@@ -48,31 +46,32 @@ public class Lexer {
         String regex = "(" + keyword + ")|(" + identifier + ")|(" + number + ")|(" + special_symbol + ")|(" + error + ")";
 
         Pattern pattern = Pattern.compile(regex);
-        Token tokens = new Token();
 
         for( Matcher matcher = pattern.matcher(str); matcher.find(); ) { // Attempt to match each capture group against the regex
             if ( matcher.start(1) != -1 ) {
         //        System.out.println("keyword: " + matcher.group() );
-                Token t = new Token( matcher.group(), "KEYWORD" );
-                tokens.addTokens(t);
+                Token t = new Token(matcher.group(), "KEYWORD" );
+                tokens.addToken(t);
             } else if ( matcher.start(2) != -1 ) {
          //       System.out.println("identifier: " + matcher.group() );
                 Token t = new Token (matcher.group(), "ID" );
-                tokens.addTokens(t);
+                tokens.addToken(t);
             } else if ( matcher.start(3) != -1 ) {
          //       System.out.println("number: " + matcher.group());
                 Token t = new Token(matcher.group(), "NUM");
-                tokens.addTokens(t);
+                tokens.addToken(t);
             } else if ( matcher.start(4) != -1 ) {
         //        System.out.println( matcher.group() );
                 Token t= new Token(matcher.group(), "SPECIAL");
-                tokens.addTokens(t);
+                tokens.addToken(t);
             } else if ( matcher.start(5) != -1 ) {
         //        System.out.println("error: " + matcher.group() );
                 Token t = new Token(matcher.group(), "ERROR");
-                tokens.addTokens(t);
+                tokens.addBadToken(t);
             }
         }
+
+        return tokens;
 
     } // getTokens
 } // class Lexer
