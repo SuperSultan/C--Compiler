@@ -1,6 +1,13 @@
 package compiler;
 
+import java.lang.reflect.Array;
+import java.util.ArrayDeque;
+
 public class Parser {
+    private static ArrayDeque<Token> tokens;
+
+    public Parser () {
+    }
 
     // program -> declaration-list
     public void program() {
@@ -16,11 +23,11 @@ public class Parser {
     //declaration_list` -> declaration declaration_list` | empty
     public void declaration_list_prime() {
 
-        // if (empty) return
-       // else {
-       //     declaration();
-      //      declaration_list_prime();
-       // }
+        if (tokens.getFirst().equals("")) return;
+        else {
+            declaration();
+            declaration_list_prime();
+        }
     }
 
     //declaration -> var_declaration | function_declaration
@@ -29,79 +36,84 @@ public class Parser {
         function_declaration();
     }
 
-    //var_declaration -> ";" | "[" "NUM" "]" ";"
+    //var_declaration -> type-specifier ID var-declaration'
     public void var_declaration() {
-        //if match(";") return true
-        //else if match("[" NUM "]" ";") return true
+        type_specifier();
+        if (tokens.removeFirst().category.equals("ID") ) {
+            var_declaration_prime();
+        }
+    }
+
+    //var-declaration' -> ; | [ NUM ] ;
+    public void var_declaration_prime() {
+        if ( tokens.removeFirst().equals(";") ) { return; }
+        else if ( tokens.removeFirst().equals("[") ) {
+            if ( tokens.removeFirst().category.equals("NUM") ) {
+                if ( tokens.removeFirst().category.equals("]") ) {
+                    if ( tokens.removeFirst().equals(";") ) { return; }
+                }
+            }
+        }
     }
 
     //type-specifier -> "int" | "void"
-    public void type_specifier() {
-        //if match("int") return true
-        //else if match("void") return true
+    public boolean type_specifier() {
+        return tokens.removeFirst().equals("int") || tokens.removeFirst().equals("void");
     }
 
-    //function_declaration -> type-specifier "ID" "(" params ")" compound-stmt
+    //fun-declaration -> int ID ( params ) compound-stmt || void ID ( params ) compound-stmt
     public void function_declaration() {
-        type_specifier();
-        //if match("ID") && match("(") && match(")"
-            compound_statement();
+        if ( tokens.removeFirst().category.equals("NUM") ) {
+            if ( tokens.removeFirst().equals("(") ) {
+                params();
+                if ( tokens.removeFirst().equals(")") ) {
+                    compound_statement();
+                }
+            }
+        }
     }
 
-    //params -> "int" "ID" param` param-list` | "void" params`
+    //params -> param-list | void
     public void params() {
-        //if match("int") && match("ID")
-            params_prime();
-            param_list_prime();
-        //else if (match("void")) {
-        //  params_prime();
-        // }
-    }
-
-    //params_prime -> "ID" param` param-list` | empty
-    public void params_prime() {
-        //if match("ID")
-            param_prime();
-            param_list_prime();
-        //else empty
+        if ( tokens.removeFirst().equals("void") ) { return; }
+        else { param_list(); }
     }
 
     //params_list -> param params-list`
-    public void params_list() {
+    public void param_list() {
         param();
-        params_list_prime();
+        param_list_prime();
     }
 
     //params_list_prime -> "," type-specifier "ID" param_prime
-    public void params_list_prime() {
-        // if match( "," )
-            type_specifier();
-            // if match("ID") {
-            //      param_prime();
-            // }
-            // else empty
+    public void param_list_prime() {
+        if ( tokens.removeFirst().equals(",") ) {
+            param();
+            param_list_prime();
+        } else return;
     }
 
-    //param -> type-specifier "ID" param`
+    //param -> int ID param` | void ID param'
     public void param() {
-        type_specifier();
-        // if ( match("ID") ) {
-        //      param_prime()
-        // }
+        if ( tokens.removeFirst().category.equals("NUM") ) {
+            if ( tokens.removeFirst().category.equals("ID") ) { param_prime(); }
+        }
     }
 
     // param_prime -> "[" "]" | empty
     public void param_prime() {
-        // if ( match("[") && match("]") return true
-        // else empty
+        if ( tokens.removeFirst().equals("[") ) {
+            if ( tokens.removeFirst().equals("]") ) { return; }
+        } else return;
     }
 
     // compound_statement -> "{" local-declarations statement-list "}"
     public void compound_statement() {
-        // if match("{")
+         if ( tokens.removeFirst().equals("{") ) {
              local_declarations();
              statement_list();
-        // if ( match("}") ) return true
+             if ( tokens.removeFirst().equals("}") ) { return; }
+         }
     }
 
     //local-declarations -> local-declarations_prime
@@ -111,141 +123,190 @@ public class Parser {
 
     // local-declarations_prime -> var-declaration local-declarations_prime | empty
     public void local_declarations_prime() {
-        // if match( empty ) return
-        var_declaration();
-        local_declarations_prime();
+        if ( tokens.removeFirst().equals("") ) { return; }
+        else {
+            var_declaration();
+            local_declarations_prime();
+        }
     }
 
     // statement_list -> statement_list_prime
-    public void statement_list() {
-        statement_list_prime();
-    }
+    public void statement_list() { statement_list_prime(); }
 
     // statement_list_prime -> statement statement_list | empty
     public void statement_list_prime() {
-        //if match( empty ) return
-        statement();
-        statement_list();
+        if ( tokens.removeFirst().equals("") ) { return; }
+        else {
+            statement();
+            statement_list();
+        }
     }
 
-    // statement -> expression-stmt | compound-stmt | selection-stmt | iteration-stmt | return-stmt
-    public void statement() {
-        // if match expression_statement;
-        // else if ( compound_statement() )
-        // else if match ( selection_statement() )
-        // else if match ( iteration_statement() )
-        // else if match ( return_statement() )
+    // statement -> expression-stmt | { local-declarations statement-list }
+    // | selection-stmt | iteration-stmt | return-stmt
+    public boolean statement() {
+         if ( tokens.removeFirst().equals("{") ) {
+             local_declarations();
+             statement_list();
+             if ( tokens.removeFirst().equals("}") ) { return true; }
+         }
+         if ( expression_statement() ) {
+             return true;
+         }
+         if ( selection_statement() ) {
+             return true;
+         }
+         if ( iteration_statement() ) {
+             return true;
+         }
+         if ( return_statement() ) {
+             return true;
+         }
+         return false;
     }
 
     // expression_statement -> expression ";" | ";"
-    public void expression_statement() {
-        // if match(";") return
-        // else
+    public boolean expression_statement() {
+         if ( tokens.removeFirst().equals(";")) {
+             return true;
+         } else {
             expression();
-            //if match( ";" ) return true
+            if ( tokens.removeFirst().equals(";") ) {
+                return true;
+            }
+         }
+         return false;
     }
 
     // selection_statement -> "if" "(" expression ")" statement selection-stmt`
-    public void selection_statement() {
-        // if ( match(";") && match("(") ) {
-        //     expression();
-                // if ( match(")") )
-                    // statement();
-        // }
+    public boolean selection_statement() {
+         if ( tokens.removeFirst().equals("if") ) {
+             if ( tokens.removeFirst().equals("(") ) {
+                 expression();
+                 if ( tokens.removeFirst().equals(")") ) {
+                     statement();
+                     selection_statement_prime();
+                     return true;
+                 }
+             }
+         }
+         return false;
     }
 
     // selection_statement_prime -> empty | "else" statement
     public void selection_statement_prime() {
-        // if ( match( empty ) ) return
-        else {
-            // if (match("else") {
-            //      statement();
-            // }
+        if ( tokens.removeFirst().equals("") ) {
+            return;
+        } else if ( tokens.removeFirst().equals("else") ) {
+            return;
         }
     }
 
     //iteration-statement -> "while" "(" expression ")" statement
-    public void iteration_statement() {
-        // if ( match("while") ) && match("(") ) {
-        //      expression();
-        //      if ( match(")") ) {
-        //          statement();
-        //      }
-        // }
+    public boolean iteration_statement() {
+        if ( tokens.removeFirst().equals("while") ) {
+            if ( tokens.removeFirst().equals("(") ) {
+                expression();
+                if ( tokens.removeFirst().equals(")") ) {
+                    statement();
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // return-stmt -> "return" return-stmt`
-    public void return_statement() {
-        // if ( match("return") ) {
-        //      return_statement_prime();
-        // }
+    public boolean return_statement() {
+        if ( tokens.removeFirst().equals("return") ) {
+            return_statement_prime();
+            return true;
+        }
+        return false;
     }
 
-    // return-stmt_prime -> ";" | expression ";"
+    // return-stmt_prime -> ; | ID ( args ) term' additive-expression' ; | ID var' = expression ;
+    // | ID var' term' additive-expression' ; | ( expression ) term' additive-expression' ;
+    // | NUM term' additive-expression' ; | additive expression relop additive-expression ;
     public void return_statement_prime() {
-        // if ( match(";" ) return
-        // else {
-        //      expression();
-        //      if ( match(";") ) return
-        // }
+        if ( tokens.removeFirst().equals(";") ) { return; }
+        else if ( tokens.removeFirst().category.equals("ID") ) {
+            if ( tokens.removeFirst().equals("(") ) {
+                args();
+                if ( tokens.removeFirst().equals(")") ) {
+                    term_prime();
+                    additive_expression_prime();
+                    if ( tokens.removeFirst().equals(";") ) { return; }
+                }
+            } else {
+                var_prime();
+                if ( tokens.removeFirst().equals("=") ) {
+                    expression();
+                    if ( tokens.removeFirst().equals(";") ) { return; }
+                } else {
+                    term_prime();
+                    additive_expression_prime();
+                    if ( tokens.removeFirst().equals(";")) { return; }
+                }
+            }
+        } else if ( tokens.removeFirst().equals("(") ) {
+            expression();
+            if ( tokens.removeFirst().equals(")") ) {
+                term_prime();
+                additive_expression_prime();
+                if ( tokens.removeFirst().equals(";") ) { return; }
+            }
+        } else if ( tokens.removeFirst().category.equals("NUM") ) {
+            term_prime();
+            additive_expression_prime();
+            if ( tokens.removeFirst().equals(";") ) { return; }
+        } else {
+            additive_expression();
+            relop();
+            additive_expression();
+            if ( tokens.removeFirst().equals(";") ) { return; }
+        }
     }
 
     // expression -> var "=" expression | simple-expression
     public void expression() {
-        var();
-        if ( match("=") ) {
-            expression();
-        } else {
-            simple_expression();
-        }
+        if ( var() ) {
+            if ( tokens.removeFirst().equals("=") ) { expression(); }
+        } else simple_expression();
     }
 
     // var -> "ID" var_prime
-    public void var() {
-        if ( match("ID") ) {
+    public boolean var() {
+        if ( tokens.removeFirst().category.equals("ID") ) {
             var_prime();
+            return true;
         }
+        return false;
     }
 
     // var_prime -> empty | "[" expression "]"
-    public void var_prime() {
-        if ( match(empty) ) return;
-        else {
-            if match("[") {
-                expression();
-            }
-            if match("]") return;
-        }
+    public boolean var_prime() {
+        if ( tokens.removeFirst().equals("[") ) {
+            expression();
+            if ( tokens.removeFirst().equals("]") ) { return true; }
+        } else if ( tokens.removeFirst().equals("") ) { return true; }
+        return false;
     }
 
-    // simple_expression -> additive_expression simple_expression`
+    // simple-expression -> additive expression relop additive-expression | additive-expression
     public void simple_expression() {
         additive_expression();
-        simple_expression_prime();
-    }
-
-    // simple_expression_prime -> relop additive-expression | empty
-    public void simple_expression_prime() {
-        if ( match( empty ) ) return;
-        relop();
-        additive_expression();
+        if ( relop() ) { additive_expression(); }
+        else { additive_expression(); }
     }
 
     // relop -> <= | >= | == | != | > | <
-    public void relop() {
-        if ( match("<=") ) {
-            return;
-        } else if ( match(">=") ) {
-            return;
-        } else if ( match("==") ) {
-            return;
-        } else if ( match("!=") ) {
-            return;
-        } else if ( match(">") ) {
-            return;
-        } else if ( match("<") ) {
-            return;
-        }
+    public boolean relop() {
+        if ( tokens.removeFirst().equals("<=") || tokens.removeFirst().equals(">=") ||
+                tokens.removeFirst().equals("==") || tokens.removeFirst().equals("!=") ||
+                tokens.removeFirst().equals(">") || tokens.removeFirst().equals("<")
+        ) { return true; }
+        return false;
     }
 
     // additive_expression -> term additive_expression_prime
@@ -256,16 +317,17 @@ public class Parser {
 
     // additive_expression_prime -> addop term additive_expression_prime | empty
     public void additive_expression_prime() {
-        if ( match(empty) ) return;
-        addop();
-        term();
-        additive_expression_prime();
+        if (tokens.removeFirst().equals("")) { return; }
+        else {
+            addop();
+            term();
+            additive_expression_prime();
+        }
     }
 
     // addop -> + | -
     public void addop() {
-        if ( match("+") ) return;
-        else if ( match("-") ) return;
+        if ( tokens.removeFirst().equals("+") || tokens.removeFirst().equals("=") ) { return; }
     }
 
     // term -> factor term_prime
@@ -276,65 +338,101 @@ public class Parser {
 
     // term_prime -> mulop factor term_prime | empty
     public void term_prime() {
-        if ( match("empty") ) return;
-        mulop();
-        factor();
-        term_prime();
+        if ( tokens.removeFirst().equals("") ) { return; }
+        else {
+            mulop();
+            factor();
+            term_prime();
+        }
     }
 
     // mulop -> * | /
-    public void mulop() {
-        if match ("*") return;
-        else if ( match("/") ) return;
+    public boolean mulop() {
+        return tokens.removeFirst().equals("*") || tokens.removeFirst().equals("/");
     }
 
-    // factor -> ( expression ) | var | call | NUM
+    //factor -> ( expression ) || ID var' || call || NUM
     public void factor() {
-        if ( match ("(") ) {
+        if ( tokens.removeFirst().equals("(") ) {
             expression();
-            if ( match(")") ) {
-                var();
-                call();
-                if ( match("NUM") ) {
-                    return;
-                }
-            }
-        }
+            if ( tokens.removeFirst().equals(")") ) { return; }
+        } else if ( tokens.removeFirst().category.equals("ID") ) {
+            var_prime();
+        } else if ( tokens.removeFirst().category.equals("NUM") ) {
+            return;
+        } else { call(); }
     }
 
     // call -> ID ( args )
     public void call() {
-        if ( match("ID") ) {
-            if ( match("(") ) {
+        if ( tokens.removeFirst().category.equals("ID") ) {
+            if ( tokens.removeFirst().equals("(") ) {
                 args();
-                if ( match(")") ) {
-                    return;
-                }
+                if ( tokens.removeFirst().equals(")") ) { return; }
             }
         }
     }
 
     // args -> args-list | empty
     public void args() {
-        if ( match(empty) ) return;
-        arg_list();
+        if ( tokens.removeFirst().equals("") ) { return; }
+        else { arg_list(); }
     }
 
-    // arg_list -> expression arg-list_prime
+    //arg-list ->
+    //          ID ( args ) term' additive-expression' arg-list'
+    //        | ID var' = expression arg-list'
+    //        | ID var' term' additive-expression' arg-list'
+    //        | ( expression ) term' additive-expression' arg-list'
+    //        | NUM term' additive-expression' arg-list'
+    //        | additive expression relop additive-expression arg-list'
     public void arg_list() {
-        expression();
-        arg_list_prime();
+        if ( tokens.removeFirst().category.equals("ID") ) {
+            if ( tokens.removeFirst().equals("(") ) {
+                args();
+                if ( tokens.removeFirst().equals(")") ) {
+                    term_prime();
+                    additive_expression_prime();
+                    arg_list_prime();
+                }
+            }
+            if (tokens.removeFirst().equals(var_prime()) ) {
+                if ( tokens.removeFirst().equals("=") ) {
+                    expression();
+                    arg_list();
+                } else {
+                    term_prime();
+                    additive_expression_prime();
+                    arg_list_prime();
+                }
+            }
+        }
+        else if ( tokens.removeFirst().equals("(") ) {
+            expression();
+            if ( tokens.removeFirst().equals(")") ) {
+                term_prime();
+                additive_expression_prime();
+                arg_list_prime();
+            }
+        } else if ( tokens.removeFirst().category.equals("NUM") ) {
+            term_prime();
+            additive_expression_prime();
+            arg_list_prime();
+        } else {
+            additive_expression();
+            relop();
+            additive_expression();
+            arg_list_prime();
+        }
     }
 
     // arg_list_prime -> , expression arg-list_prime | empty
     public void arg_list_prime() {
-        if ( match(",") ) {
+        if ( tokens.removeFirst().equals("") ) { return; }
+        else if ( tokens.removeFirst().equals(",") ) {
             expression();
             arg_list_prime();
-        } else if ( match("empty") ) {
-            return;
         }
     }
 
-
-}
+} // Parser

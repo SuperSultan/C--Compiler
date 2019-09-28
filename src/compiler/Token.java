@@ -1,19 +1,18 @@
 package compiler;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.ArrayDeque;
 
 class Token {
 
-    private String lexeme;
-    private String category;
+    String lexeme;
+    String category;
     private int scope;
     private boolean validity;
     private static int tokensize;
-    private static List<Token> tokens = new ArrayList<Token>();
+    private static ArrayDeque<Token> tokens = new ArrayDeque<Token>();
 
     Token (String lexeme, String category) {
-        this.lexeme = lexeme; // KEYWORD, ID, NUM, ERROR, SPECIAL_SYMBOL, ERROR
-        this.category = category; // the actual token itself
+        this.category = category; // KEYWORD, ID, NUM, ERROR, SPECIAL_SYMBOL, ERROR
     }
 
     Token () {}
@@ -28,7 +27,7 @@ class Token {
         }
     }
 
-    public List<Token> getTokenList() {
+    public ArrayDeque<Token> getTokenList() {
         return tokens;
     }
 

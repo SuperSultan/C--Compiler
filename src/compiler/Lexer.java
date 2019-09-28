@@ -1,7 +1,5 @@
 package compiler;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.String;
 import java.util.Scanner;
 import java.util.regex.Matcher;

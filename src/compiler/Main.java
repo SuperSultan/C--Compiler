@@ -26,7 +26,6 @@ public class Main {
 
         Token tokens = new Token();
         tokens.getTokenList();
-
     }
 
 }
