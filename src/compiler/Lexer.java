@@ -52,24 +52,24 @@ public class Lexer {
 
         for( Matcher matcher = pattern.matcher(str); matcher.find(); ) { // Attempt to match each capture group against the regex
             if ( matcher.start(1) != -1 ) {
-                System.out.println("keyword: " + matcher.group() );
-                Token t = new Token("KEYWORD", matcher.group() );
+        //        System.out.println("keyword: " + matcher.group() );
+                Token t = new Token( matcher.group(), "KEYWORD" );
                 tokens.addTokens(t);
             } else if ( matcher.start(2) != -1 ) {
-                System.out.println("identifier: " + matcher.group() );
-                Token t = new Token ("ID", matcher.group() );
+         //       System.out.println("identifier: " + matcher.group() );
+                Token t = new Token (matcher.group(), "ID" );
                 tokens.addTokens(t);
             } else if ( matcher.start(3) != -1 ) {
-                System.out.println("number: " + matcher.group());
-                Token t = new Token("NUM", matcher.group() );
+         //       System.out.println("number: " + matcher.group());
+                Token t = new Token(matcher.group(), "NUM");
                 tokens.addTokens(t);
             } else if ( matcher.start(4) != -1 ) {
-                System.out.println( matcher.group() );
-                Token t= new Token("SPECIAL", matcher.group() );
+        //        System.out.println( matcher.group() );
+                Token t= new Token(matcher.group(), "SPECIAL");
                 tokens.addTokens(t);
             } else if ( matcher.start(5) != -1 ) {
-                System.out.println("error: " + matcher.group() );
-                Token t = new Token("ERROR", matcher.group());
+        //        System.out.println("error: " + matcher.group() );
+                Token t = new Token(matcher.group(), "ERROR");
                 tokens.addTokens(t);
             }
         }

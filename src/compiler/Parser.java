@@ -4,10 +4,15 @@ import java.util.ArrayDeque;
 
 public class Parser {
 
-    private boolean isAccept = true;
+    private boolean isAccept;
     private static ArrayDeque<Token> tokens;
 
     public Parser () {
+        isAccept = true;
+    }
+
+    public boolean isAccepted(Token theTokens) {
+        return isAccept;
     }
 
     // program -> declaration-list
@@ -113,25 +118,17 @@ public class Parser {
          }
     }
 
-    //local-declarations -> local-declarations_prime
+    // local-declarations -> var-declaration local-declarations | empty
     public void local_declarations() {
-        local_declarations_prime();
-    }
-
-    // local-declarations_prime -> var-declaration local-declarations_prime | empty
-    public void local_declarations_prime() {
         if ( tokens.removeFirst().equals("") ) return;
         else {
             var_declaration();
-            local_declarations_prime();
+            local_declarations();
         }
     }
 
-    // statement_list -> statement_list_prime
-    public void statement_list() { statement_list_prime(); }
-
-    // statement_list_prime -> statement statement_list | empty
-    public void statement_list_prime() {
+    // statement_list -> statement statement_list | empty
+    public void statement_list() {
         if ( tokens.removeFirst().equals("") ) return;
         else {
             statement();
@@ -411,7 +408,7 @@ public class Parser {
 
     // arg_list_prime -> , expression arg-list_prime | empty
     public void arg_list_prime() {
-        if ( tokens.removeFirst().equals("") ) { return; }
+        if ( tokens.removeFirst().equals("") ) return;
         else if ( tokens.removeFirst().equals(",") ) {
             expression();
             arg_list_prime();
