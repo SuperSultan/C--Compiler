@@ -18,6 +18,7 @@ public class Parser {
     }
 
     public boolean isAccepted(ArrayDeque<Token> theTokens) {
+        program();
         return isAccept;
     }
 

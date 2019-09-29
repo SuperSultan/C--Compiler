@@ -1,5 +1,5 @@
-int MEGAFUNCTION ( void )
-{
-    x + 3;
-    return four;
+int sub(int z) {
+  int x;
+  int y;
+  if (x > y) return(z+z); else x = 5;
 }
