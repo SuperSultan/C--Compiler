@@ -1,7 +1,5 @@
 package compiler;
 
-import java.util.ArrayDeque;
-
 class Token {
 
     private String lexeme;
@@ -17,6 +15,10 @@ class Token {
 
     public String getCategory(Token token) {
         return token.category;
+    }
+
+    public String getLexeme(Token token) {
+        return token.lexeme;
     }
 
 } // class Token

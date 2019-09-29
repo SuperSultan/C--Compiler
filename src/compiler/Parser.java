@@ -1,8 +1,6 @@
 package compiler;
 
-import java.lang.reflect.Array;
 import java.util.ArrayDeque;
-import java.util.Iterator;
 
 public class Parser {
 
@@ -15,18 +13,12 @@ public class Parser {
         this.tokens = theTokens;
     }
 
-    public boolean isAccepted(ArrayDeque<Token> theTokens) {
-        return isAccept;
+    public Token getCurrentToken() {
+        return tokens.removeFirst();
     }
 
-    public void isLexicallyCorrect(ArrayDeque<Token> theTokens) {
-
-        //ArrayDeque<Token> tokens = token.getTokenList();
-        for(Token tok: theTokens) {
-            if (tok.getCategory(tok).equals("ERROR")) {
-                isAccept = false;
-            }
-        }
+    public boolean isAccepted(ArrayDeque<Token> theTokens) {
+        return isAccept;
     }
 
     // program -> declaration-list
@@ -64,7 +56,7 @@ public class Parser {
 
     //var-declaration' -> ; | [ NUM ] ;
     public void var_declaration_prime() {
-        if ( tokens.removeFirst().equals(";") ) { return; }
+        if ( tokens.removeFirst().equals(";") ) return;
         else if ( tokens.removeFirst().equals("[") ) {
             if ( tokens.removeFirst().getCategory(token).equals("NUM") ) {
                 if ( tokens.removeFirst().getCategory(token).equals("]") ) {

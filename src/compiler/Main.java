@@ -2,7 +2,9 @@ package compiler;
 import java.io.IOException;
 import java.io.File;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.List;
 
 public class Main {
 
@@ -18,25 +20,20 @@ public class Main {
         System.out.println("SAMPLE INPUT: ");
         while ( printer.hasNext() ) { System.out.println(printer.nextLine()); } // print source code
 
-        Lexer lexer = new Lexer();
-        Scanner removedComments = lexer.stripComments(scanner); // return a scanner without comments
+        Lexer lexer = new Lexer(scanner);
+        List<String> lines = new ArrayList<>();
+        lines = lexer.stripComments();
 
         ArrayDeque<Token> tokens = new ArrayDeque<>();
+        tokens = lexer.addTokens(lines);
 
-        while ( removedComments.hasNext() ) {
-            lexer.addTokens(tokens, removedComments.nextLine()); // add each token from each line
-        }
-
-        System.out.println();
-        System.out.println("The tokens: ");
-        for(Token token: tokens) {
-            System.out.println(token);
+        for(Token toks: tokens) {
+            System.out.println("Lexeme: " + toks.getLexeme(toks) + "\nCategory: " + toks.getCategory(toks));
         }
 
         Parser parser = new Parser(tokens);
-        System.out.println();
-        parser.isLexicallyCorrect(tokens);
         System.out.println(parser.isAccepted(tokens) ? "ACCEPT" : "REJECT");
+
     }
 
 }
