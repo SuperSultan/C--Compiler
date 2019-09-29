@@ -1,6 +1,7 @@
 package compiler;
 
 import java.lang.String;
+import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -36,7 +37,7 @@ public class Lexer {
         return scanner;
     } //stripComments
 
-    public Token addTokens(Token tokens, String str) {
+    public ArrayDeque<Token> addTokens(ArrayDeque<Token> tokens, String str) {
 
         String keyword = "\\b(?:else|if|int|return|void|while)\\b";
         String identifier = "\\b[a-zA-Z]+\\b";
@@ -50,27 +51,26 @@ public class Lexer {
         for( Matcher matcher = pattern.matcher(str); matcher.find(); ) { // Attempt to match each capture group against the regex
             if ( matcher.start(1) != -1 ) {
         //        System.out.println("keyword: " + matcher.group() );
-                Token t = new Token(matcher.group(), "KEYWORD" );
-                tokens.addToken(t);
+               // Token t = new Token(matcher.group(), "KEYWORD" );
+                tokens.add(new Token(matcher.group(), "KEYWORD" ));
             } else if ( matcher.start(2) != -1 ) {
          //       System.out.println("identifier: " + matcher.group() );
-                Token t = new Token (matcher.group(), "ID" );
-                tokens.addToken(t);
+               // Token t = new Token (matcher.group(), "ID" );
+                tokens.add(new Token (matcher.group(), "ID" ));
             } else if ( matcher.start(3) != -1 ) {
          //       System.out.println("number: " + matcher.group());
-                Token t = new Token(matcher.group(), "NUM");
-                tokens.addToken(t);
+                //Token t = new Token(matcher.group(), "NUM");
+                tokens.add(new Token(matcher.group(), "NUM"));
             } else if ( matcher.start(4) != -1 ) {
         //        System.out.println( matcher.group() );
-                Token t= new Token(matcher.group(), "SPECIAL");
-                tokens.addToken(t);
+              //  Token t= new Token(matcher.group(), "SPECIAL");
+                tokens.add(new Token(matcher.group(), "SPECIAL"));
             } else if ( matcher.start(5) != -1 ) {
         //        System.out.println("error: " + matcher.group() );
-                Token t = new Token(matcher.group(), "ERROR");
-                tokens.addBadToken(t);
+               // Token t = new Token(matcher.group(), "ERROR");
+                tokens.add(new Token(matcher.group(), "ERROR"));
             }
         }
-
         return tokens;
 
     } // getTokens

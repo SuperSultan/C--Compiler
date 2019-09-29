@@ -1,6 +1,7 @@
 package compiler;
 import java.io.IOException;
 import java.io.File;
+import java.util.ArrayDeque;
 import java.util.Scanner;
 
 public class Main {
@@ -20,20 +21,22 @@ public class Main {
         Lexer lexer = new Lexer();
         Scanner removedComments = lexer.stripComments(scanner); // return a scanner without comments
 
-        Token token = new Token();
+        ArrayDeque<Token> tokens = new ArrayDeque<>();
 
         while ( removedComments.hasNext() ) {
-            lexer.addTokens(token, removedComments.nextLine()); // add each token from each line
+            lexer.addTokens(tokens, removedComments.nextLine()); // add each token from each line
         }
 
         System.out.println();
         System.out.println("The tokens: ");
-        token.printTokens();
+        for(Token token: tokens) {
+            System.out.println(token);
+        }
 
-        Parser parser = new Parser(token);
+        Parser parser = new Parser(tokens);
         System.out.println();
-        parser.isLexicallyCorrect(token);
-        System.out.println(parser.isAccepted(token) ? "ACCEPT" : "REJECT");
+        parser.isLexicallyCorrect(tokens);
+        System.out.println(parser.isAccepted(tokens) ? "ACCEPT" : "REJECT");
     }
 
 }

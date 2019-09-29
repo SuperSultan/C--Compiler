@@ -10,19 +10,19 @@ public class Parser {
     private Token token;
     private ArrayDeque<Token> tokens;
 
-    public Parser (Token token) {
+    public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
-        this.token = token;
+        this.tokens = theTokens;
     }
 
-    public boolean isAccepted(Token theTokens) {
+    public boolean isAccepted(ArrayDeque<Token> theTokens) {
         return isAccept;
     }
 
-    public void isLexicallyCorrect(Token token) {
+    public void isLexicallyCorrect(ArrayDeque<Token> theTokens) {
 
-        ArrayDeque<Token> tokens = token.getTokenList();
-        for(Token tok: tokens) {
+        //ArrayDeque<Token> tokens = token.getTokenList();
+        for(Token tok: theTokens) {
             if (tok.getCategory(tok).equals("ERROR")) {
                 isAccept = false;
             }
