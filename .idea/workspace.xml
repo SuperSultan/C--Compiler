@@ -4,7 +4,6 @@
     <list default="true" id="956d7451-1e23-44bf-b9b5-c988eb8ba012" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/compiler/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/compiler/Parser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/compiler/Token.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/compiler/Token.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -54,13 +53,27 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/compiler/Parser.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="89">
-              <caret line="141" column="22" lean-forward="true" selection-start-line="141" selection-start-column="22" selection-end-line="141" selection-end-column="22" />
+            <state relative-caret-position="229">
+              <caret line="357" column="30" selection-start-line="357" selection-start-column="30" selection-end-line="357" selection-end-column="30" />
               <folding>
+                <element signature="e#0#17944#0" expanded="true" />
                 <element signature="e#316#317#0" expanded="true" />
                 <element signature="e#359#360#0" expanded="true" />
-                <element signature="e#13576#13577#0" expanded="true" />
-                <element signature="e#14249#14250#0" expanded="true" />
+                <element signature="e#13993#13994#0" expanded="true" />
+                <element signature="e#14666#14667#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/compiler/Token.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="224">
+              <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+              <folding>
+                <element signature="e#427#428#0" expanded="true" />
+                <element signature="e#462#463#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -71,19 +84,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="45">
               <caret line="3" column="2" selection-start-line="3" selection-start-column="2" selection-end-line="3" selection-end-column="2" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/compiler/Token.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="274">
-              <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
-              <folding>
-                <element signature="e#427#428#0" expanded="true" />
-                <element signature="e#462#463#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -184,7 +184,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1570044305822" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1570049634900" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
@@ -345,7 +345,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32959327" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.38569424" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.4109397" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.29032257" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -408,7 +408,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/compiler/Parser.java</url>
-          <line>96</line>
+          <line>97</line>
           <properties />
           <option name="timeStamp" value="18" />
         </line-breakpoint>
@@ -434,13 +434,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/compiler/Node.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" selection-start-line="3" selection-end-line="3" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/compiler/Lexer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-423">
@@ -461,9 +454,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/parser_test.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="2" selection-start-line="3" selection-start-column="2" selection-end-line="3" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/compiler/Node.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/compiler/Token.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
+        <state relative-caret-position="224">
           <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
           <folding>
             <element signature="e#427#428#0" expanded="true" />
@@ -472,22 +479,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/parser_test.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="2" selection-start-line="3" selection-start-column="2" selection-end-line="3" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/compiler/Parser.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="89">
-          <caret line="141" column="22" lean-forward="true" selection-start-line="141" selection-start-column="22" selection-end-line="141" selection-end-column="22" />
+        <state relative-caret-position="229">
+          <caret line="357" column="30" selection-start-line="357" selection-start-column="30" selection-end-line="357" selection-end-column="30" />
           <folding>
+            <element signature="e#0#17944#0" expanded="true" />
             <element signature="e#316#317#0" expanded="true" />
             <element signature="e#359#360#0" expanded="true" />
-            <element signature="e#13576#13577#0" expanded="true" />
-            <element signature="e#14249#14250#0" expanded="true" />
+            <element signature="e#13993#13994#0" expanded="true" />
+            <element signature="e#14666#14667#0" expanded="true" />
           </folding>
         </state>
       </provider>
