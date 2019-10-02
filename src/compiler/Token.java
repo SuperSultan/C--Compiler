@@ -14,11 +14,12 @@ class Token {
     Token () {}
 
     public String getCategory(Token token) {
-        return token.category;
+        //return this.getFirst().category;
+        return this.category;
     }
 
     public String getLexeme(Token token) {
-        return token.lexeme;
+        return this.lexeme;
     }
 
 } // class Token
