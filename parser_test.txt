@@ -61,4 +61,8 @@ int main(void) {
 	intmainvoid(a = 4 + 4, b, c, d);
 	newsub();
 	return 0;
+	klasdjglkasndglasdngskadlgnlasdgn
+
 }
+
+asdgasdgasdg
