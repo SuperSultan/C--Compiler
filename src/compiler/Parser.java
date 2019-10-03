@@ -246,8 +246,7 @@ public class Parser {
                 if ( tokens.removeFirst().equals("=") ) {
                     expression();
                     if ( tokens.removeFirst().equals(";") ) return;
-                } else {
-                    term_prime();
+                } else if ( term_prime() ){
                     additive_expression_prime();
                     if ( tokens.removeFirst().equals(";")) return;
                 }
@@ -264,7 +263,6 @@ public class Parser {
             additive_expression_prime();
             if ( tokens.removeFirst().equals(";") ) return;
         } else if ( additive_expression() ){
-            //additive_expression();
             relop();
             additive_expression();
             if ( tokens.removeFirst().equals(";") ) return;
