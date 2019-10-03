@@ -52,7 +52,7 @@ int foointvoid (int a, int b[], int c, int d[]) {
 }
 
 int main(void) {
-	int a;
+	int asadfasdfasdfasdf;
 	int b[1];
 	int c;
 	int d[1];
@@ -61,8 +61,4 @@ int main(void) {
 	intmainvoid(a = 4 + 4, b, c, d);
 	newsub();
 	return 0;
-	klasdjglkasndglasdngskadlgnlasdgn
-
 }
-
-asdgasdgasdg
