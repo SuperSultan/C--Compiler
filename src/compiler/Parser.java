@@ -47,10 +47,8 @@ public class Parser {
     // follows: $
     public void declaration_list_prime() {
         if (tokens.isEmpty()) return;
-        else {
-            declaration();
-            declaration_list_prime();
-        }
+        declaration();
+        declaration_list_prime();
     }
 
     //declaration -> var_declaration | function_declaration
@@ -95,7 +93,9 @@ public class Parser {
     // firsts: int void
     // follows: ID
     public boolean type_specifier() {
-        return tokens.removeFirst().equals("int") || tokens.removeFirst().equals("void");
+        if ( tokens.removeFirst().equals("int") || tokens.removeFirst().equals("void")) return true;
+        isAccept = false;
+        return false;
     }
 
     //fun-declaration -> int ID ( params ) compound-stmt || void ID ( params ) compound-stmt
@@ -355,13 +355,16 @@ public class Parser {
     // var_prime -> empty | "[" expression "]"
     // firsts: [ empty
     // follows: != ) * + , - / ; < <= = == > >= ]
-    public void var_prime() { 
-        if ( tokens.isEmpty() ) return;
-        if ( tokens.removeFirst().equals("[") )
+    public boolean var_prime() {
+        if (tokens.removeFirst().getLexeme(token).matches("!=|\\)|\\*|\\+|,|-|/|;|<|<=|=|==|>|>=|]")) return true;
+        else if (tokens.removeFirst().equals("[")) {
             expression();
-            if ( tokens.removeFirst().equals("]") ) { return; }
-        //isAccept = false;
-        //return false;
+            if (tokens.removeFirst().equals("]")) {
+                return true;
+            }
+        }
+        isAccept = false;
+        return false;
     }
 
     // simple-expression -> additive-expression relop additive-expression | additive-expression
@@ -370,17 +373,13 @@ public class Parser {
     public void simple_expression() {
         additive_expression();
         if ( relop() ) { additive_expression(); }
-        //else { additive_expression(); }
     }
 
     // relop -> <= | >= | == | != | > | <
     // firsts: != < <= == > >=
     // follows: ( ID NUM
-    public boolean relop() { //TODO refactor this!
-        if ( tokens.removeFirst().equals("<=") || tokens.removeFirst().equals(">=") ||
-                tokens.removeFirst().equals("==") || tokens.removeFirst().equals("!=") ||
-                tokens.removeFirst().equals(">") || tokens.removeFirst().equals("<")
-        ) { return true; }
+    public boolean relop() {
+        if ( tokens.removeFirst().getLexeme(token).matches("<=|>=|==|!=|>|<")) return true;
         isAccept = false;
         return false;
     }
@@ -388,69 +387,78 @@ public class Parser {
     // additive_expression -> term additive_expression_prime
     // firsts: ( ID NUM
     // follows: != ) , ; < <= == > >= ]
-    public void additive_expression() {
-        term();
-        additive_expression_prime();
+    public boolean additive_expression() {
+        if ( term() ) {
+            additive_expression_prime();
+            return true;
+        }
+        isAccept = false;
+        return false;
     }
 
     // additive_expression_prime -> addop term additive_expression_prime | empty
     // firsts: + - empty
     // follows: != ) , ; < <= == > >= ]
-    public void additive_expression_prime() {
-        if (tokens.removeFirst().equals("")) { return; }
-        else {
-            addop();
-            term();
-            additive_expression_prime();
-        }
+    public void additive_expression_prime() { //TODO fix this
+        if ( tokens.removeFirst().getLexeme(token).matches("!=|\\)|,|;|<|<=|==|>|>=|]") )
+        addop();
+        term();
+        additive_expression_prime();
     }
 
     // addop -> + | -
     // firsts: + -
     // follows: ( ID NUM
-    public void addop() {
-        if ( tokens.removeFirst().equals("+") || tokens.removeFirst().equals("=") ) { return; }
+    public boolean addop() {
+        if ( tokens.removeFirst().getLexeme(token).matches("\\+|=")) return true;
+        return false;
     }
 
     // term -> factor term_prime
     // firsts: ( ID NUM
     // follows: != ) + , - ; < <= == > >= ]
-    public void term() {
-        factor();
-        term_prime();
+    public boolean term() {
+        if ( factor() ) {
+            term_prime();
+            return true;
+        }
+        isAccept = false;
+        return false;
     }
 
     // term_prime -> mulop factor term_prime | empty
     // firsts: * / empty
     // follows: != ) + , - ; < <= == > >= ]
     public void term_prime() {
-        if ( tokens.removeFirst().equals("") ) { return; }
-        else {
-            mulop();
-            factor();
-            term_prime();
-        }
+        if ( tokens.removeFirst().getLexeme(token).matches("!=|\\)|\\+|,|-|;|<|<=|==|>|>=|]")) return;
+        mulop();
+        factor();
+        term_prime();
     }
 
     // mulop -> * | /
     // firsts: * /
     // follows: ( ID NUM
     public boolean mulop() {
-        return tokens.removeFirst().equals("*") || tokens.removeFirst().equals("/");
+        if ( tokens.removeFirst().getLexeme(token).matches("\\*|/")) return true;
+        isAccept = false;
+        return false;
     }
 
     //factor -> ( expression ) || ID var' || call || NUM
     // firsts: ( ID NUM
     // follows: != ) * + , - / ; < <= == > >= ]
-    public void factor() {
+    public boolean factor() {
         if ( tokens.removeFirst().equals("(") ) {
             expression();
-            if ( tokens.removeFirst().equals(")") ) { return; }
+            if ( tokens.removeFirst().equals(")") ) return true;
         } else if ( tokens.removeFirst().getCategory(token).equals("ID") ) {
             var_prime();
         } else if ( tokens.removeFirst().getCategory(token).equals("NUM") ) {
-            return;
+            return true;
         } else { call(); }
+        isAccept = false;
+        return false;
     }
 
     // call -> ID ( args )
@@ -460,7 +468,7 @@ public class Parser {
         if ( tokens.removeFirst().getCategory(token).equals("ID") ) {
             if ( tokens.removeFirst().equals("(") ) {
                 args();
-                if ( tokens.removeFirst().equals(")") ) { return; }
+                if ( tokens.removeFirst().equals(")") ) return;
             }
         }
     }
@@ -469,8 +477,8 @@ public class Parser {
     // firsts: ( ID NUM additive empty
     // follows: )
     public void args() {
-        if ( tokens.removeFirst().equals("") ) { return; }
-        else { arg_list(); }
+        if ( tokens.removeFirst().equals(")") ) return;
+        arg_list();
     }
 
     //arg-list ->
@@ -479,7 +487,7 @@ public class Parser {
     //        | ID var' term' additive-expression' arg-list'
     //        | ( expression ) term' additive-expression' arg-list'
     //        | NUM term' additive-expression' arg-list'
-    //        | additive expression relop additive-expression arg-list'
+    //        | additive-expression relop additive-expression arg-list'
     // firsts: ( ID NUM additive
     // follows: )
     public void arg_list() {
@@ -492,7 +500,7 @@ public class Parser {
                     arg_list_prime();
                 }
             }
-            if (tokens.removeFirst().equals(var_prime()) ) {
+            if ( var_prime() ) {
                 if ( tokens.removeFirst().equals("=") ) {
                     expression();
                     arg_list();
@@ -526,7 +534,7 @@ public class Parser {
     // firsts: , empty
     // follows: )
     public void arg_list_prime() {
-        if ( tokens.removeFirst().equals("") ) return;
+        if ( tokens.removeFirst().equals(")") ) return;
         else if ( tokens.removeFirst().equals(",") ) {
             expression();
             arg_list_prime();
