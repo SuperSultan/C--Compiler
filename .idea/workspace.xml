@@ -52,8 +52,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/compiler/Parser.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="158">
-              <caret line="361" column="28" selection-start-line="361" selection-start-column="16" selection-end-line="361" selection-end-column="28" />
+            <state relative-caret-position="216">
+              <caret line="439" selection-start-line="439" selection-end-line="439" />
               <folding>
                 <element signature="e#0#17894#0" expanded="true" />
               </folding>
@@ -94,7 +94,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>ERROR</find>
       <find>.category</find>
       <find>float</find>
       <find>lines</find>
@@ -108,7 +107,6 @@
       <find>local_declaration</find>
       <find>empty</find>
       <find>additive-expression</find>
-      <find>additive_expression</find>
       <find>term()</find>
       <find>factor()</find>
       <find>type_specifier()</find>
@@ -124,6 +122,8 @@
       <find>statement()</find>
       <find>var_prime</find>
       <find>term_prime()</find>
+      <find>additive_expression</find>
+      <find>relop()</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -336,12 +336,12 @@
       <workItem from="1569731693137" duration="76000" />
       <workItem from="1569731793516" duration="114000" />
       <workItem from="1569731935574" duration="1681000" />
-      <workItem from="1570073533097" duration="8447000" />
+      <workItem from="1570073533097" duration="9599000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="10318000" />
+    <option name="totallyTimeSpent" value="11470000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="343" y="63" width="1128" height="1032" extended-state="0" />
@@ -356,7 +356,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32896304" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.35261402" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.20689656" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.28843862" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -481,8 +481,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/compiler/Parser.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="158">
-          <caret line="361" column="28" selection-start-line="361" selection-start-column="16" selection-end-line="361" selection-end-column="28" />
+        <state relative-caret-position="216">
+          <caret line="439" selection-start-line="439" selection-end-line="439" />
           <folding>
             <element signature="e#0#17894#0" expanded="true" />
           </folding>
