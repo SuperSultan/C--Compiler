@@ -28,7 +28,6 @@ public class Lexer {
             String line = s.nextLine().trim();
             if ( line.length() == 0 ) continue; // skip empty line in stream
 
-            System.out.println("INPUT: " + line);
             line = line.replaceAll("(\\/\\/).*", ""); // replace everything after line comments with ""
 
             if ( comment_mode && line.contains("*/") && !line.contains("/*") ) {
@@ -62,19 +61,14 @@ public class Lexer {
 
             for (Matcher matcher = pattern.matcher(str); matcher.find(); ) { // Attempt to match each capture group against the regex
                 if (matcher.start(1) != -1) {
-                    System.out.println("keyword: " + matcher.group() );
                     tokens.add(new Token(matcher.group(), "KEYWORD"));
                 } else if (matcher.start(2) != -1) {
-                    System.out.println("identifier: " + matcher.group() );
                     tokens.add(new Token(matcher.group(), "ID"));
                 } else if (matcher.start(3) != -1) {
-                    System.out.println("number: " + matcher.group());
                     tokens.add(new Token(matcher.group(), "NUM"));
                 } else if (matcher.start(4) != -1) {
-                    System.out.println( matcher.group() );
                     tokens.add(new Token(matcher.group(), "SPECIAL"));
                 } else if (matcher.start(5) != -1) {
-                    System.out.println("error: " + matcher.group() );
                     tokens.add(new Token(matcher.group(), "ERROR"));
                     System.out.println("REJECT");
                     System.exit(0); // Exit program upon finding BAD token!
