@@ -14,8 +14,6 @@ class Token {
         return this.category;
     }
 
-    public String getLexeme() {
-        return this.lexeme;
-    }
+    public String getLexeme() { return this.lexeme; }
 
 } // class Token
