@@ -72,9 +72,7 @@ public class Parser {
     // FIRSTS: int void FOLLOWS: $ int void
     public void declaration() {
         debug("declaration");
-        if ( tokens.getFirst().getLexeme().equals("int") || tokens.getFirst().getLexeme().equals("void") ) {
-            type_specifier();
-        }
+        type_specifier();
         if ( tokens.getFirst().getCategory().equals("ID") ) {
             tokens.removeFirst();
         }
@@ -99,7 +97,7 @@ public class Parser {
     }
 
     //var-declaration' ->  ; | [ NUM ] ;
-    // FIRSTS: ; [ FOLLOWS: int void $
+    // FIRSTS: ; [ FOLLOWS: $ ( ; ID NUM if int return void while { }
     public void var_declaration_prime() {
         debug("var_declaration-prime");
         if (tokens.isEmpty()) return;
@@ -210,7 +208,7 @@ public class Parser {
     }
 
     // var-declaration -> type-specifier ID var-declaration`
-    // FIRSTS: int void FOLLOWS: int void
+    // FIRSTS: int void FOLLOWS: ( ; ID NUM if int return void while { }
     public void var_declaration() {
         debug("var-declaration");
         type_specifier();
@@ -233,7 +231,7 @@ public class Parser {
     }
 
     // statement -> expression-stmt | compound-stmt | selection-stmt | iteration-stmt | return-stmt
-    // FIRSTS: NUM ID ( ; { if while return FOLLOWS: NUM ID ( ; { if while return }
+    // FIRSTS: NUM ID ( ; { if while return FOLLOWS: ( ; ID NUM else if return while { }
     public void statement() {
         debug("statement");
         if ( tokens.getFirst().getLexeme().equals("(") || tokens.getFirst().getLexeme().equals(";") ||
@@ -255,7 +253,7 @@ public class Parser {
     }
 
     // expression_statement -> expression ";" | ";"
-    // FIRSTS: ( ; ID NUM FOLLOWS: ( ; ID NUM additive else if return while { }
+    // FIRSTS: ( ; ID NUM FOLLOWS: ( ; ID NUM else if return while { }
     public void expression_statement() {
         debug("expression_statement");
         if ( tokens.getFirst().getLexeme().equals(";") ) {
@@ -271,9 +269,10 @@ public class Parser {
     }
 
     // compound-stmt -> { local-declarations statement-list }
-    // FIRSTS: { FOLLOWS: }
+    // FIRSTS: { FOLLOWS: $ ( ; ID NUM else if int return void while { }
     public void compound_statement() {
         debug("compound_statement");
+        if ( tokens.isEmpty() ) return;
         if (tokens.getFirst().getLexeme().equals("{")) {
             tokens.removeFirst();
             local_declarations();
@@ -285,7 +284,7 @@ public class Parser {
     }
 
     // selection_statement -> if ( expression ) statement selection-stmt`
-    // FIRSTS: if FOLLOWS: ( ; ID NUM if return while { }
+    // FIRSTS: if FOLLOWS: ( ; ID NUM else if return while { }
     public void selection_statement() {
         debug("selection_statement");
         if ( tokens.getFirst().getLexeme().equals("if") ) {
@@ -303,10 +302,10 @@ public class Parser {
     }
 
     // selection_statement_prime -> empty | else statement
-    // FIRSTS: else empty FOLLOWS: ( ; ID NUM if return while { }
+    // FIRSTS: else empty FOLLOWS: ( ; ID NUM else if return while { }
     public void selection_statement_prime() {
         debug("selection_statement_prime");
-        if (tokens.getFirst().getLexeme().matches("\\(|;|if|return|while|\\{|}") ||
+        if (tokens.getFirst().getLexeme().matches("\\(|;|else|if|return|while|\\{|}") ||
                 tokens.getFirst().getCategory().equals("ID") || tokens.getFirst().getCategory().equals("NUM") ) {
             return;
         }
@@ -317,7 +316,7 @@ public class Parser {
     }
 
     //iteration-statement -> while ( expression ) statement
-    // FIRSTS: while FOLLOWS: ( ; ID NUM additive else if return while { }
+    // FIRSTS: while FOLLOWS: ( ; ID NUM else if return while { }
     public void iteration_statement() {
         debug("iteration_statement");
         if ( tokens.getFirst().getLexeme().equals("while") ) {
@@ -334,7 +333,7 @@ public class Parser {
     }
 
     // return-stmt -> return return-stmt`
-    // FIRSTS: return FOLLOWS: ( ; ID NUM additive else if return while { }
+    // FIRSTS: return FOLLOWS: ( ; ID NUM else if return while { }
     public void return_statement() {
         debug("return_statement");
         if ( tokens.getFirst().getLexeme().equals("return") ) {
@@ -344,7 +343,8 @@ public class Parser {
     }
 
     // return-stmt` -> ; | expression ;
-    // FIRSTS: ; NUM ID ( FOLLOWS: NUM ID ( ; { if while return }
+    // FIRSTS: ( ; NUM ID FOLLOWS: ( ; ID NUM else if return while { }
+
     public void return_statement_prime() {
         debug("return_statement_prime");
         if ( tokens.getFirst().getLexeme().equals(";") ) {
@@ -360,7 +360,7 @@ public class Parser {
     }
 
     // expression ->  NUM term` additive-expression` simple-expression` | ( expression ) term` additive-expression` simple-expression` | ID expression`
-    // FIRSTS: NUM ( ID FOLLOWS: , ) ; ]
+    // FIRSTS: ( NUM ID FOLLOWS: , ) ; ]
     public void expression() {
         debug("expression");
         if ( tokens.getFirst().getCategory().equals("NUM") ) {
@@ -452,7 +452,7 @@ public class Parser {
     }
 
     // relop -> <= | >= | == | != | > | <
-    // FIRSTS: != < <= == > >= FOLLOWS: ID NUM (
+    // FIRSTS: != < <= == > >= FOLLOWS: ( ID NUM
     public void relop() {
         debug("relop");
         if ( tokens.getFirst().getLexeme().matches("<=|>=|==|!=|>|<")) {
@@ -475,7 +475,7 @@ public class Parser {
     // FIRSTS: + - empty FOLLOWS: <= < > >= == != , ) ; ] NUM ( ID
     public void additive_expression_prime() {
         debug("additive_expresion_prime");
-        if ( tokens.getFirst().getLexeme().matches("!=|\\)|,|;|<=|==|>=|]|<|>|\\(") ||
+        if ( tokens.getFirst().getLexeme().matches("!=|\\)|,|;|<=|==|>=|]|<|>") ||
                 tokens.getFirst().getCategory().equals("NUM") || tokens.getFirst().getCategory().equals("ID") ) {
             return;
         }
@@ -496,7 +496,7 @@ public class Parser {
     }
 
     // term -> factor term`
-    // FIRSTS: NUM ID ( FOLLOWS: + - <= < > >= == != , ) ; ] NUM ( ID
+    // FIRSTS: NUM ID ( FOLLOWS: != ) + , - ; < <= == > >= ]
     public void term() {
         debug("term");
         if ( tokens.getFirst().getCategory().equals("ID") || tokens.getFirst().getCategory().equals("NUM") ||
@@ -507,10 +507,10 @@ public class Parser {
     }
 
     // term` -> mulop factor term` | empty
-    // FIRSTS: * / empty FOLLOWS: + - <= < > >= == != , ) ; ] NUM ( ID
+    // FIRSTS: * / empty FOLLOWS: != ) + , - ; < <= == > >= ]
     public void term_prime() {
         debug("term_prime");
-        if ( tokens.getFirst().getLexeme().matches("!=|\\)|\\+|,|-|;|<=|==|>=|<|>|]|\\(") ||
+        if ( tokens.getFirst().getLexeme().matches("!=|\\)|\\+|,|-|;|<=|==|>=|<|>|]") ||
                 tokens.getFirst().getCategory().equals("NUM") || tokens.getFirst().getCategory().equals("ID") ) {
             return;
         }
@@ -531,7 +531,7 @@ public class Parser {
     }
 
     // factor -> ( expression ) | ID factor` | NUM
-    // FIRSTS: NUM ID ( FOLLOWS: * / + - <= < > >= == != , ) ; ] NUM ( ID
+    // FIRSTS: ( NUM ID FOLLOWS: != ) * + , - / ; < <= == > >= ]
     public void factor() {
         debug("factor");
         if ( tokens.getFirst().getLexeme().equals("(") ) {
@@ -551,11 +551,10 @@ public class Parser {
     }
 
     // factor` -> [ expression ] | ( args ) | empty
-    // FIRSTS: [ ( empty FOLLOWS: NUM ID * / + - <= < > >= == != , ) ; ] (
+    // FIRSTS: [ ( empty FOLLOWS: FOLLOWS: != ) * + , - / ; < <= == > >= ]
     public void  factor_prime() {
         debug("factor_prime");
-        if ( tokens.getFirst().getCategory().equals("NUM") || tokens.getFirst().getCategory().equals("ID") ||
-                tokens.getFirst().getLexeme().matches("<=|>=|==|!=|\\*|/|\\+|-|<|>|,|\\)|;|]|\\(") ) {
+        if ( tokens.getFirst().getLexeme().matches("<=|>=|==|!=|\\*|/|\\+|-|<|>|,|\\)|;|]") ) {
             return;
         }
         if ( tokens.getFirst().getLexeme().equals("[") ) {
