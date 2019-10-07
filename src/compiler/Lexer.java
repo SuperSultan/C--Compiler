@@ -76,6 +76,8 @@ public class Lexer {
             }
         }
 
+        tokens.add(new Token("$", "SPECIAL"));
+
         return tokens;
 
     } // getTokens

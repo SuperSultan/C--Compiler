@@ -1,8 +1,3 @@
 void main(void) {
-<<<<<<< HEAD
-	a[0;
+	sub(a, b);
 }
-=======
-        a[main];
-}
->>>>>>> 6df1dbfe0a05fd851ae2d536c2877880418c0218
