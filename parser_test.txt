@@ -1,3 +1,8 @@
 void main(void) {
+<<<<<<< HEAD
 	a[0;
 }
+=======
+        a[main];
+}
+>>>>>>> 6df1dbfe0a05fd851ae2d536c2877880418c0218
