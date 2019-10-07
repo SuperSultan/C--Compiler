@@ -18,13 +18,6 @@ public class Parser {
 
     public boolean isAccepted() {
 
-        /*try {
-            program();
-        } catch (NoSuchElementException exception) {
-            System.out.println("ACCEPT");
-            System.exit(0);
-        }*/
-
         program();
         if ( tokens.getFirst().getLexeme().equals("$") && isAccept) {
             return true;
@@ -34,9 +27,9 @@ public class Parser {
     }
 
     public void print_rule(String rulename) {
-        if ( tokens.getFirst() != null ) {
-            System.out.println(rulename + " " + tokens.getFirst().getLexeme());
-        }
+        //if ( tokens.getFirst() != null ) {
+        //    System.out.println(rulename + " " + tokens.getFirst().getLexeme());
+        //}
     }
 
     public void reject() {
@@ -131,7 +124,7 @@ public class Parser {
         print_rule("type-specifier");
         if ( tokens.getFirst().getLexeme().equals("int") || tokens.getFirst().getLexeme().equals("void") ) {
             tokens.removeFirst();
-        }
+        } else reject();
     }
 
     // params -> int ID param` param-list` | void params`
@@ -144,12 +137,12 @@ public class Parser {
                 tokens.removeFirst();
                 param_prime();
                 param_list_prime();
-            }
+            } // else reject();
         }
         if ( tokens.getFirst().getLexeme().equals("void") ) {
             tokens.removeFirst();
             params_prime();
-        }
+        } // else reject();
     }
 
     // params' -> ID param` param-list` | empty
@@ -464,8 +457,6 @@ public class Parser {
         if ( tokens.getFirst().getLexeme().matches("<=|>=|==|!=|<|>") ) {
             relop();
             additive_expression();
-        } else {
-            reject();
         }
     }
 
