@@ -27,9 +27,9 @@ public class Parser {
     }
 
     public void print_rule(String rulename) {
-        //if ( tokens.getFirst() != null ) {
-        //    System.out.println(rulename + " " + tokens.getFirst().getLexeme());
-        //}
+        if ( tokens.getFirst() != null ) {
+            System.out.println(rulename + " " + tokens.getFirst().getLexeme());
+        }
     }
 
     public void reject() {
@@ -137,12 +137,12 @@ public class Parser {
                 tokens.removeFirst();
                 param_prime();
                 param_list_prime();
-            } // else reject();
+            } else reject();
         }
         if ( tokens.getFirst().getLexeme().equals("void") ) {
             tokens.removeFirst();
             params_prime();
-        } // else reject();
+        }
     }
 
     // params' -> ID param` param-list` | empty
@@ -173,7 +173,7 @@ public class Parser {
                 tokens.removeFirst();
                 param_prime();
                 param_list_prime();
-            }
+            } else reject();
 
         }
     }
@@ -189,7 +189,7 @@ public class Parser {
             tokens.removeFirst();
             if ( tokens.getFirst().getLexeme().equals("]") ) {
                 tokens.removeFirst();
-            }
+            } else reject();
         }
     }
 
@@ -214,7 +214,7 @@ public class Parser {
         type_specifier();
         if ( tokens.getFirst().getCategory().equals("ID") ) {
             tokens.removeFirst();
-        }
+        } else reject();
         var_declaration_prime();
     }
 
@@ -299,9 +299,9 @@ public class Parser {
                     tokens.removeFirst();
                     statement();
                     selection_statement_prime();
-                }
-            }
-        }
+                } else reject();
+            } else reject();
+        } else reject();
     }
 
     // selection_statement_prime -> empty | else statement
@@ -315,7 +315,7 @@ public class Parser {
         if ( tokens.getFirst().getLexeme().equals("else") ) {
             tokens.removeFirst();
             statement();
-        }
+        } else reject();
     }
 
     //iteration-statement -> while ( expression ) statement
@@ -333,8 +333,8 @@ public class Parser {
                 } else {
                     reject();
                 }
-            }
-        }
+            } else reject();
+        } else reject();
     }
 
     // return-stmt -> return return-stmt`
@@ -344,7 +344,7 @@ public class Parser {
         if ( tokens.getFirst().getLexeme().equals("return") ) {
             tokens.removeFirst();
             return_statement_prime();
-        }
+        } else reject();
     }
 
     // return-stmt` -> ; | expression ;
@@ -383,7 +383,7 @@ public class Parser {
                 term_prime();
                 additive_expression_prime();
                 simple_expression_prime();
-            }
+            } else reject();
         }
         if ( tokens.getFirst().getCategory().equals("ID") ) {
             tokens.removeFirst();
@@ -404,7 +404,6 @@ public class Parser {
             expression();
             expression_prime_prime();
             if ( tokens.getFirst().equals("]") ) {
-            //    tokens.removeFirst(); <- this was messing everything up
                 expression_prime_prime();
             } else {
                 reject();
@@ -425,7 +424,7 @@ public class Parser {
                 term_prime();
                 additive_expression_prime();
                 simple_expression_prime();
-            }
+            } else reject();
         }
     }
 
@@ -496,7 +495,7 @@ public class Parser {
             addop();
             term();
             additive_expression_prime();
-        }
+        } else reject();
     }
 
     // addop -> + | -
@@ -624,7 +623,7 @@ public class Parser {
             tokens.removeFirst();
             expression();
             arg_list_prime();
-        }
+        } else reject();
     }
 
 } // Parser
