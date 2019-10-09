@@ -10,9 +10,7 @@ class Token {
         this.category = category; // KEYWORD, ID, NUM, ERROR, SPECIAL_SYMBOL
     }
 
-    public String getCategory() {
-        return this.category;
-    }
+    public String getCategory() { return this.category; }
 
     public String getLexeme() { return this.lexeme; }
 
