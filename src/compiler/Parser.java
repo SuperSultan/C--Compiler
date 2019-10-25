@@ -21,9 +21,9 @@ public class Parser {
     }
 
     public void print_rule(String rulename) {
-        //if ( tokens.getFirst() != null ) {
-        //    System.out.println(rulename + " " + nextLexeme());
-        //}
+        if ( tokens.getFirst() != null ) {
+            System.out.println(rulename + " " + nextLexeme());
+         }
     }
 
     public void reject() {
@@ -61,9 +61,8 @@ public class Parser {
     //declaration -> type-specifier ID declaration_prime FIRSTS: int void FOLLOWS: $ int void
     public void declaration() {
         print_rule("declaration");
-        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-            type_specifier();
-        }
+        if ( tokens.isEmpty() ) return;
+        type_specifier();
         if ( nextCategory().equals("ID") ) {
             removeToken();
         }
@@ -183,7 +182,9 @@ public class Parser {
     public void var_declaration() {
         print_rule("var-declaration");
         type_specifier();
-        if ( nextCategory().equals("ID") ) removeToken(); else reject();
+        if ( nextCategory().equals("ID") ) {
+            removeToken();
+        } else reject();
         var_declaration_prime();
     }
 
@@ -326,8 +327,10 @@ public class Parser {
         if ( nextLexeme().equals("[") ) {
             removeToken();
             expression();
-            expression_prime_prime();
-            if ( tokens.getFirst().equals("]") ) expression_prime_prime(); else reject();
+            if ( nextLexeme().equals("]") ) {
+                removeToken();
+                expression_prime_prime();
+            } else reject();
         }
         if ( nextLexeme().equals("*") || nextLexeme().equals("/") ||
             nextLexeme().matches("<=|>=|==|!=|,|\\)|;|]|\\(|\\+|-|<|>") ||
@@ -448,6 +451,7 @@ public class Parser {
     // factor_prime -> [ expression ] | ( args ) | empty FIRSTS: [ ( empty FOLLOWS: NUM ID * / + - <= < > >= == != , ) ; ] (
     public void  factor_prime() {
         print_rule("factor_prime");
+        if ( tokens.isEmpty() ) return;
         if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().matches("<=|>=|==|!=|\\*|/|\\+|-|<|>|,|\\)|;|]|\\(") ) return;
         if ( nextLexeme().equals("[") ) {
             removeToken();
