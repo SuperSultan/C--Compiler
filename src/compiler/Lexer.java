@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Lexer {
-    Scanner s;
+    private Scanner s;
 
     Lexer(Scanner scanner) {
         this.s = scanner;
@@ -21,7 +21,6 @@ public class Lexer {
         String complete_block_comment = "(\\/\\*).*(\\*\\/)|(\\/\\*).*";
         String incomplete_block_comment = "(\\/\\*).*";
         String closing_block_comment = "^(.*?)(\\*\\/)";
-
         List<String> lines = new ArrayList<>();
 
         while ( s.hasNext() ) {
@@ -54,11 +53,9 @@ public class Lexer {
         String error = "\\S+";
         String regex = "(" + keyword + ")|(" + identifier + ")|(" + number + ")|(" + special_symbol + ")|(" + error + ")";
         Pattern pattern = Pattern.compile(regex);
-
         ArrayDeque<Token> tokens = new ArrayDeque<>();
 
         for(String str: lines) {
-
             for (Matcher matcher = pattern.matcher(str); matcher.find(); ) { // Attempt to match each capture group against the regex
                 if (matcher.start(1) != -1) {
                     tokens.add(new Token(matcher.group(), "KEYWORD"));
@@ -75,9 +72,7 @@ public class Lexer {
                 }
             }
         }
-
         tokens.add(new Token("$", "SPECIAL"));
-
         return tokens;
 
     } // getTokens
