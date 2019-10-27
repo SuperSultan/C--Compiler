@@ -12,7 +12,7 @@ public class Main {
 
         Scanner scanner = new Scanner(new File(args[0])); // used to parse tokens
         if ( args.length != 1 ) {
-            System.out.println("Usage: java Lexer filename");
+            System.out.println("Usage: java p3 filename");
             System.exit(0);
         }
 
@@ -26,6 +26,8 @@ public class Main {
         Parser parser = new Parser(tokens);
         System.out.println(parser.isAccepted() ? "ACCEPT" : "REJECT");
 
+        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser);
+        System.out.println(semanticAnalyzer.isAccepted() ? "ACCEPT" : "REJECT");
     }
 
 }
