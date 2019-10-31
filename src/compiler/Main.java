@@ -18,7 +18,7 @@ public class Main {
 
         Lexer lexer = new Lexer(scanner);
         List<String> lines = new ArrayList<>();
-        lines = lexer.stripComments();
+        lines = lexer.stripComments(); // stripped comments
 
         ArrayDeque<Token> tokens = new ArrayDeque<>();
         tokens = lexer.addTokens(lines);
@@ -27,7 +27,7 @@ public class Main {
         System.out.println(parser.isAccepted() ? "ACCEPT" : "REJECT");
 
         SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser);
-        System.out.println(semanticAnalyzer.isAccepted() ? "ACCEPT" : "REJECT");
+        // System.out.println(semanticAnalyzer.isAccepted() ? "ACCEPT" : "REJECT");
     }
 
 }

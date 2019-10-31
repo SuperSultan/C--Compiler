@@ -44,10 +44,10 @@ public class Parser {
         print_rule("declaration_list");
         Node declaration_list = new Node("declaration_list");
         if (tokens.isEmpty()) return;
-        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+        //if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
             declaration();
             declaration_list_prime();
-        }
+       // }
     }
 
     //declaration-list_prime -> declaration declaration-list_prime | empty FIRSTS: int void ϵ FOLLOWS: $

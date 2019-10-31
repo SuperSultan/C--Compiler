@@ -12,8 +12,10 @@ public class Node {
         this.name = name;
         switch(name) {
             case "program":
+                // declaration list
                 break;
             case "declaration_list":
+                // declaration list, declaration list prime
                 break;
             case "declaration_list_prime":
                 break;
