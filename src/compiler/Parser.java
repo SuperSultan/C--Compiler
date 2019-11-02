@@ -21,7 +21,7 @@ public class Parser {
 
     public String nextLexeme() { return tokens.getFirst().getLexeme(); }
     public String nextCategory() { return tokens.getFirst().getCategory(); }
-    public Token nextToken() { return tokens.getFirst(); }
+    public String nextToken() { return tokens.getFirst().getLexeme(); }
     public void removeToken() { tokens.removeFirst(); }
 
     public boolean isAccepted() {

@@ -11,7 +11,7 @@ public class Node {
     private Node child;
     private Token t;
     private List<Node> childNodes = new ArrayList<>();
-    private List<Token> childTokens = new ArrayList<>();
+    private List<String> childTokens = new ArrayList<>();
 
     Node(String name) {
         this.name = name;
@@ -102,8 +102,12 @@ public class Node {
         return this.name;
     }
 
-    public void addChildToken(Token t) {
-        childTokens.add(t);
+    public List<String> getChildTokens() {
+        return childTokens;
+    }
+
+    public void addChildToken(String s) {
+        childTokens.add(s);
     }
 
     public void addChildNode(Node child) {
