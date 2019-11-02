@@ -10,11 +10,16 @@ public class Node {
     private Node parent;
     private Node child;
     private Token t;
-    private List<Node> childNodes = new ArrayList<>();
+    private List<String> childNodes = new ArrayList<>();
     private List<String> childTokens = new ArrayList<>();
 
     Node(String name) {
         this.name = name;
+        this.scope = 0;
+        this.parent = null;
+        this.child = null;
+        this.t = null;
+
         switch(name) {
             case "program": // -> declaration-list FIRST: int, void FOLLOWS: $
                 break;
@@ -43,6 +48,9 @@ public class Node {
             case "param_prime": // -> [ ] | empty FIRSTS: [ empty FOLLOWS: , )
                 break;
             case "compound_statement": // -> { local-declarations statement-list } FIRSTS: { FOLLOWS: }
+                //if ( parent.equals("param_list_prime") ) {
+                //    scope = 0;
+                //}
                 break;
             case "local_declarations": // -> var-declaration local-declarations | empty FIRSTS: int void empty FOLLOWS: ( ; ID NUM if return while { }
                 break;
@@ -106,11 +114,19 @@ public class Node {
         return childTokens;
     }
 
+    public List<String> getChildNodes() {
+        return childNodes;
+    }
+
+    public int getScope() {
+        return scope;
+    }
+
     public void addChildToken(String s) {
         childTokens.add(s);
     }
 
-    public void addChildNode(Node child) {
+    public void addChildNode(String child) {
         childNodes.add(child);
     }
 

@@ -46,6 +46,7 @@ public class Parser {
         Node program = new Node("program");
         nodes.add(program);
         if (tokens.isEmpty()) return;
+        program.addChildNode("declaration_list");
         declaration_list();
     }
 
@@ -55,7 +56,9 @@ public class Parser {
         Node declaration_list = new Node("declaration_list");
         nodes.add(declaration_list);
         if (tokens.isEmpty()) return;
+            declaration_list.addChildNode("declaration");
             declaration();
+            declaration_list.addChildNode("declaration_list_prime");
             declaration_list_prime();
     }
 
@@ -66,7 +69,9 @@ public class Parser {
         nodes.add(declaration_list_prime);
         if (tokens.isEmpty()) return;
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+            declaration_list_prime.addChildNode("declaration");
             declaration();
+            declaration_list_prime.addChildNode("declaration_list_prime");
             declaration_list_prime();
         }
     }
@@ -82,6 +87,7 @@ public class Parser {
             declaration.addChildToken(nextToken());
             removeToken();
         }
+        declaration.addChildNode("declaration_prime");
         declaration_prime();
     }
 
@@ -99,11 +105,14 @@ public class Parser {
     //declaration_prime -> var-declaration_prime | fun-declaration FIRSTS: ( ; [ FOLLOWS: int void $
     public void declaration_prime() {
         print_rule("declaration_prime");
-        nodes.add(new Node("declaration_prime"));
+        Node declaration_prime = new Node("declaration_prime");
+        nodes.add(declaration_prime);
         if (tokens.isEmpty()) return;
         if (nextLexeme().equals("(")) {
+            declaration_prime.addChildNode("fun_declaration");
             fun_declaration();
         } else {
+            declaration_prime.addChildNode("var_declaration_prime");
             var_declaration_prime();
         }
     }
@@ -117,10 +126,12 @@ public class Parser {
         if ( nextLexeme().equals("(") ) {
             fun_declaration.addChildToken(nextToken());
             removeToken();
+            fun_declaration.addChildNode("params");
             params();
             if ( nextLexeme().equals(")") ) {
                 fun_declaration.addChildToken(nextToken());
                 removeToken();
+                fun_declaration.addChildNode("compound_statement");
                 compound_statement();
             }
         }
@@ -165,13 +176,16 @@ public class Parser {
             if ( nextCategory().equals("ID") ) {
                 params.addChildToken(nextToken());
                 removeToken();
+                params.addChildNode("param_prime");
                 param_prime();
+                params.addChildNode("param_list_prime");
                 param_list_prime();
             } else reject();
         }
         if ( nextLexeme().equals("void") ) {
             params.addChildToken(nextToken());
             removeToken();
+            params.addChildNode("params_prime");
             params_prime();
         }
     }
@@ -185,12 +199,14 @@ public class Parser {
         if ( nextCategory().equals("ID") ) {
             params_prime.addChildToken(nextToken());
             removeToken();
+            params_prime.addChildNode("param_prime");
             param_prime();
+            params_prime.addChildNode("param_list_prime");
             param_list_prime();
         }
     }
 
-    //param-list_prime -> , type-specifier ID param_prime param-list_prime | empty FIRSTS: , empty FOLLOWS: )
+    //param-list_prime -> , type-specifier ID param_prime param_list_prime | empty FIRSTS: , empty FOLLOWS: )
     public void param_list_prime() {
         print_rule("param_list_prime");
         Node param_list_prime = new Node("param_list_prime");
@@ -199,11 +215,14 @@ public class Parser {
         if ( nextLexeme().equals(",") ) {
             param_list_prime.addChildToken(nextToken());
             removeToken();
+            param_list_prime.addChildNode("type_specifier");
             type_specifier();
             if ( nextCategory().equals("ID") ) {
                 param_list_prime.addChildToken(nextToken());
                 removeToken();
+                param_list_prime.addChildNode("param_prime");
                 param_prime();
+                param_list_prime.addChildNode("param_list_prime");
                 param_list_prime();
             } else reject();
 
@@ -233,7 +252,9 @@ public class Parser {
         nodes.add(local_declarations);
         if ( nextCategory().equals("ID") || nextCategory().equals("NUM") || nextLexeme().matches("\\(|;|if|return|while|\\{|}")) return;
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+            local_declarations.addChildNode("var_declaration");
             var_declaration();
+            local_declarations.addChildNode("local_declarations");
             local_declarations();
         }
     }
@@ -243,11 +264,13 @@ public class Parser {
         print_rule("var_declaration");
         Node var_declaration = new Node("var_declaration");
         nodes.add(var_declaration);
+        var_declaration.addChildNode("type_specifier");
         type_specifier();
         if ( nextCategory().equals("ID") ) {
             var_declaration.addChildToken(nextToken());
             removeToken();
         } else reject();
+        var_declaration.addChildNode("var_declaration_prime");
         var_declaration_prime();
     }
 
@@ -258,7 +281,9 @@ public class Parser {
         nodes.add(statement_list);
         if ( nextLexeme().equals("}") ) return;
         if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().matches("\\(|;|if|return|while|\\{") ) {
+            statement_list.addChildNode("statement");
             statement();
+            statement_list.addChildNode("statement_list");
             statement_list();
         }
     }
@@ -268,11 +293,26 @@ public class Parser {
         print_rule("statement");
         Node statement = new Node("statement");
         nodes.add(statement);
-        if ( nextLexeme().equals("(") || nextLexeme().equals(";") || nextCategory().equals("ID") || nextCategory().equals("NUM") ) expression_statement();
-        if ( nextLexeme().equals("{") ) compound_statement();
-        if ( nextLexeme().equals("if")) selection_statement();
-        if ( nextLexeme().equals("while") ) iteration_statement();
-        if ( nextLexeme().equals("return") ) return_statement();
+        if ( nextLexeme().equals("(") || nextLexeme().equals(";") || nextCategory().equals("ID") || nextCategory().equals("NUM") ) {
+            statement.addChildNode("expression_statement");
+            expression_statement();
+        }
+        if ( nextLexeme().equals("{") ) {
+            statement.addChildNode("compound_statement");
+            compound_statement();
+        }
+        if ( nextLexeme().equals("if")) {
+            statement.addChildNode("selection_statement");
+            selection_statement();
+        }
+        if ( nextLexeme().equals("while") ) {
+            statement.addChildNode("iteration_statement");
+            iteration_statement();
+        }
+        if ( nextLexeme().equals("return") ) {
+            statement.addChildNode("return_statement");
+            return_statement();
+        }
     }
 
     // expression_statement -> expression ; | ; FIRSTS: ( ; ID NUM FOLLOWS: ( ; ID NUM additive else if return while { }
@@ -285,6 +325,7 @@ public class Parser {
             removeToken();
         }
         if ( nextLexeme().equals("(") || nextCategory().equals("ID") || nextCategory().equals("NUM") ) {
+            expression_statement.addChildNode("expression");
             expression();
             if (nextLexeme().equals(";")) {
                 expression_statement.addChildToken(nextToken());
@@ -301,7 +342,9 @@ public class Parser {
         if ( nextLexeme().equals("{") ) {
             compound_statement.addChildToken(nextToken());
             removeToken();
+            compound_statement.addChildNode("local_declarations");
             local_declarations();
+            compound_statement.addChildNode("statement_list");
             statement_list();
             if ( nextLexeme().equals("}") ) {
                 compound_statement.addChildToken(nextToken());
@@ -321,11 +364,14 @@ public class Parser {
             if ( nextLexeme().equals("(") ) {
                 selection_statement.addChildToken(nextToken());
                 removeToken();
+                selection_statement.addChildNode("expression");
                 expression();
                 if ( nextLexeme().equals(")") ) {
                     selection_statement.addChildToken(nextToken());
                     removeToken();
+                    selection_statement.addChildNode("statement");
                     statement();
+                    selection_statement.addChildNode("selection_statement_prime");
                     selection_statement_prime();
                 } else reject();
             } else reject();
@@ -341,6 +387,7 @@ public class Parser {
         if ( nextLexeme().equals("else") ) {
             selection_statement_prime.addChildToken(nextToken());
             removeToken();
+            selection_statement_prime.addChildNode("statement");
             statement();
         } else reject();
     }
@@ -356,10 +403,12 @@ public class Parser {
             if ( nextLexeme().equals("(") ) {
                 iteration_statement.addChildToken(nextToken());
                 removeToken();
+                iteration_statement.addChildNode("expression");
                 expression();
                 if ( nextLexeme().equals(")") ) {
                     iteration_statement.addChildToken(nextToken());
                     removeToken();
+                    iteration_statement.addChildNode("statement");
                     statement();
                 } else reject();
             } else reject();
@@ -374,6 +423,7 @@ public class Parser {
         if ( nextLexeme().equals("return") ) {
             return_statement.addChildToken(nextToken());
             removeToken();
+            return_statement.addChildNode("return_statement_prime");
             return_statement_prime();
         } else reject();
     }
@@ -388,6 +438,7 @@ public class Parser {
             removeToken();
         }
         if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().equals("(") ) {
+            return_statement_prime.addChildNode("expression");
             expression();
             if ( nextLexeme().equals(";") ) {
                 return_statement_prime.addChildToken(nextToken());
@@ -404,25 +455,33 @@ public class Parser {
         if ( nextCategory().equals("NUM") ) {
             expression.addChildToken(nextToken());
             removeToken();
+            expression.addChildNode("term_prime");
             term_prime();
+            expression.addChildNode("additive_expression_prime");
             additive_expression_prime();
+            expression.addChildNode("simple_expression_prime");
             simple_expression_prime();
         }
         if ( nextLexeme().equals("(") ) {
             expression.addChildToken(nextToken());
             removeToken();
+            expression.addChildNode("expression");
             expression();
             if ( nextLexeme().equals(")") ) {
                 expression.addChildToken(nextToken());
                 removeToken();
+                expression.addChildNode("term_prime");
                 term_prime();
+                expression.addChildNode("additive_expression_prime");
                 additive_expression_prime();
+                expression.addChildNode("simple_expression_prime");
                 simple_expression_prime();
             } else reject();
         }
         if ( nextCategory().equals("ID") ) {
             expression.addChildToken(nextToken());
             removeToken();
+            expression.addChildNode("expression_prime");
             expression_prime();
         }
     }
@@ -435,6 +494,7 @@ public class Parser {
         if ( nextLexeme().equals("=") ) {
             expression_prime.addChildToken(nextToken());
             removeToken();
+            expression_prime.addChildNode("expression");
             expression();
         }
         if ( nextLexeme().equals("[") ) {
@@ -444,24 +504,31 @@ public class Parser {
             if ( nextLexeme().equals("]") ) {
                 expression_prime.addChildToken(nextToken());
                 removeToken();
+                expression_prime.addChildNode("expression_prime_prime");
                 expression_prime_prime();
             } else reject();
         }
-        if ( nextLexeme().equals("*") || nextLexeme().equals("/") || nextLexeme().matches("<=|>=|==|!=|,|\\)|;|]|\\(|\\+|-|<|>") ||
-                nextCategory().equals("NUM") || nextCategory().equals("ID") ) {
+        if ( nextLexeme().equals("*") || nextLexeme().equals("/") || nextLexeme().matches("<=|>=|==|!=|,|\\)|;|]|\\(|\\+|-|<|>") || nextCategory().equals("NUM") || nextCategory().equals("ID") ) {
+            expression_prime.addChildNode("term_prime");
             term_prime();
+            expression_prime.addChildNode("additive_expression_prime");
             additive_expression_prime();
+            expression_prime.addChildNode("simple_expression_prime");
             simple_expression_prime();
         }
         if ( nextLexeme().equals("(") ) {
             expression_prime.addChildToken(nextToken());
             removeToken();
+            expression_prime.addChildNode("args");
             args();
             if ( nextLexeme().equals(")") ) {
                 expression_prime.addChildToken(nextToken());
                 removeToken();
+                expression_prime.addChildNode("term_prime");
                 term_prime();
+                expression_prime.addChildNode("additive_expression_prime");
                 additive_expression_prime();
+                expression_prime.addChildNode("simple_expression_prime");
                 simple_expression_prime();
             } else reject();
         }
@@ -475,11 +542,15 @@ public class Parser {
         if ( nextLexeme().equals("=") ) {
             expression_prime_prime.addChildToken(nextToken());
             removeToken();
+            expression_prime_prime.addChildNode("expression");
             expression();
         }
         if ( nextLexeme().equals("*") || nextLexeme().equals("/") || nextLexeme().matches("<=|>=|==|!=|,|\\)|;|]|\\(|\\+|-|<|>") || nextCategory().equals("NUM") || nextCategory().equals("ID") ) {
+            expression_prime_prime.addChildNode("term_prime");
             term_prime();
+            expression_prime_prime.addChildNode("additive_expression_prime");
             additive_expression_prime();
+            expression_prime_prime.addChildNode("simple_expression_prime");
             simple_expression_prime();
         }
     }
@@ -491,7 +562,9 @@ public class Parser {
         nodes.add(simple_expression_prime);
         if ( nextLexeme().equals(",") || nextLexeme().equals(")") || nextLexeme().equals(";") || nextLexeme().equals("]") ) return;
         if ( nextLexeme().matches("<=|>=|==|!=|<|>") ) {
+            simple_expression_prime.addChildNode("relop");
             relop();
+            simple_expression_prime.addChildNode("additive_expression");
             additive_expression();
         }
     }
@@ -513,7 +586,9 @@ public class Parser {
         Node additive_expression = new Node("additive_expression");
         nodes.add(additive_expression);
         if ( nextCategory().equals("ID") || nextCategory().equals("NUM") || nextLexeme().equals("(") ) {
+            additive_expression.addChildNode("term");
             term();
+            additive_expression.addChildNode("additive_expression_prime");
             additive_expression_prime();
         } else reject();
     }
@@ -525,8 +600,11 @@ public class Parser {
         nodes.add(additive_expression_prime);
         if ( nextLexeme().matches("!=|\\)|,|;|<=|==|>=|]|<|>|\\(") || nextCategory().equals("NUM") || nextCategory().equals("ID") ) return;
         if ( nextLexeme().matches("\\+|-") ) {
+            additive_expression_prime.addChildNode("addop");
             addop();
+            additive_expression_prime.addChildNode("term");
             term();
+            additive_expression_prime.addChildNode("additive_expression_prime");
             additive_expression_prime();
         } else reject();
     }
@@ -548,7 +626,9 @@ public class Parser {
         Node term = new Node("term");
         nodes.add(term);
         if ( nextCategory().equals("ID") || nextCategory().equals("NUM") || nextLexeme().equals("(") ) {
+            term.addChildNode("factor");
             factor();
+            term.addChildNode("term_prime");
             term_prime();
         } else reject();
     }
@@ -560,8 +640,11 @@ public class Parser {
         nodes.add(term_prime);
         if ( nextLexeme().matches("!=|\\)|\\+|,|-|;|<=|==|>=|<|>|]|\\(") || nextCategory().equals("NUM") || nextCategory().equals("ID") ) return;
         if ( nextLexeme().equals("*") || nextLexeme().equals("/") ) {
+            term_prime.addChildNode("mulop");
             mulop();
+            term_prime.addChildNode("factor");
             factor();
+            term_prime.addChildNode("term_prime");
             term_prime();
         } else reject();
     }
@@ -585,6 +668,7 @@ public class Parser {
         if ( nextLexeme().equals("(") ) {
             factor.addChildToken(nextToken());
             removeToken();
+            factor.addChildNode("expression");
             expression();
             if ( nextLexeme().equals(")") ) {
                 factor.addChildToken(nextToken());
@@ -594,6 +678,7 @@ public class Parser {
         if ( nextCategory().equals("ID") ) {
             factor.addChildToken(nextToken());
             removeToken();
+            factor.addChildNode("factor_prime");
             factor_prime();
         }
         if ( nextCategory().equals("NUM") ) {
@@ -612,6 +697,7 @@ public class Parser {
         if ( nextLexeme().equals("[") ) {
             factor_prime.addChildToken(nextToken());
             removeToken();
+            factor_prime.addChildNode("expression");
             expression();
             if ( nextLexeme().equals("]") ) {
                 factor_prime.addChildToken(nextToken());
@@ -621,6 +707,7 @@ public class Parser {
         if ( nextLexeme().equals("(") ) {
             factor_prime.addChildToken(nextToken());
             removeToken();
+            factor_prime.addChildNode("args");
             args();
             if ( nextLexeme().equals(")") ) {
                 factor_prime.addChildToken(nextToken());
@@ -635,7 +722,10 @@ public class Parser {
         Node args = new Node("args");
         nodes.add(args);
         if ( nextLexeme().equals(")") ) return;
-        if ( nextCategory().equals("ID") || nextCategory().equals("NUM") || nextLexeme().equals("(") ) arg_list();
+        if ( nextCategory().equals("ID") || nextCategory().equals("NUM") || nextLexeme().equals("(") ) {
+            args.addChildNode("arg_list");
+            arg_list();
+        }
     }
 
     // arg-list -> expression arg-list_prime FIRSTS: NUM ID ( FOLLOWS: )
@@ -644,7 +734,9 @@ public class Parser {
         Node arg_list = new Node("arg_list");
         nodes.add(arg_list);
         if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().equals("(") ) {
+            arg_list.addChildNode("expression");
             expression();
+            arg_list.addChildNode("arg_list_prime");
             arg_list_prime();
         } else reject();
     }
@@ -658,7 +750,9 @@ public class Parser {
         if ( nextLexeme().equals(",") ) {
             arg_list_prime.addChildToken(nextToken());
             removeToken();
+            arg_list_prime.addChildNode("expression");
             expression();
+            arg_list_prime.addChildNode("arg_list_prime");
             arg_list_prime();
         } else reject();
     }

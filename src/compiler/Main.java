@@ -31,7 +31,7 @@ public class Main {
 
 
         for(Node n : nodes) {
-            System.out.println(n.getName() + " " + n.getChildTokens());
+            System.out.println(n.getName() + " " + n.getChildNodes() + " " + n.getChildTokens() + " " + n.getScope());
         }
 
         //SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser);
