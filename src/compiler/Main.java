@@ -29,9 +29,9 @@ public class Main {
         List<Node> nodes = new ArrayList<>();
         nodes = parser.getNodes();
 
-
+        System.out.println();
         for(Node n : nodes) {
-            System.out.println(n.getName() + " " + n.getChildNodes() + " " + n.getChildTokens() + " " + n.getScope());
+            System.out.println(n.getName() + "\nChildern: " + n.getChildNodes() + "\nLexemes: " + n.getChildTokens() + "\nScope: " + n.getScope() + "\n");
         }
 
         //SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser);
