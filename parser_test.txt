@@ -53,7 +53,7 @@ int foointvoid (int a, int b[], int c, int d[]) {
 
 int main(void) {
 	int a;
-	int b[1]; // this is where we screw up (10/25/19)
+	int b[1];
 	int c;
 	int d[1];
 	a = yeetsub(4);

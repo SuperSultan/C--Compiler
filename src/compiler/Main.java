@@ -26,8 +26,15 @@ public class Main {
         Parser parser = new Parser(tokens);
         System.out.println(parser.isAccepted() ? "ACCEPT" : "REJECT");
 
-        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser);
-        // System.out.println(semanticAnalyzer.isAccepted() ? "ACCEPT" : "REJECT");
+        List<Node> nodes = new ArrayList<>();
+        nodes = parser.getNodes();
+
+        for(Node n : nodes) {
+            System.out.println("Name: " + n.getName());
+        }
+
+        //SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser);
+        //System.out.println(semanticAnalyzer.isAccepted() ? "ACCEPT" : "REJECT");
     }
 
 }

@@ -1,18 +1,27 @@
 package compiler;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Parser {
 
     private boolean isAccept;
     private ArrayDeque<Token> tokens;
+    private List<Node> nodes;
 
     public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
         this.tokens = theTokens;
+        nodes = new ArrayList<>();
+    }
+
+    public List<Node> getNodes() {
+        return nodes;
     }
 
     public String nextLexeme() { return tokens.getFirst().getLexeme(); }
     public String nextCategory() { return tokens.getFirst().getCategory(); }
+    public Token nextToken() { return tokens.getFirst(); }
     public void removeToken() { tokens.removeFirst(); }
 
     public boolean isAccepted() {
@@ -35,6 +44,7 @@ public class Parser {
     public void program() {
         print_rule("program");
         Node program = new Node("program");
+        nodes.add(program);
         if (tokens.isEmpty()) return;
         declaration_list();
     }
@@ -43,19 +53,19 @@ public class Parser {
     public void declaration_list() {
         print_rule("declaration_list");
         Node declaration_list = new Node("declaration_list");
+        nodes.add(declaration_list);
         if (tokens.isEmpty()) return;
-        //if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
             declaration();
             declaration_list_prime();
-       // }
     }
 
     //declaration-list_prime -> declaration declaration-list_prime | empty FIRSTS: int void ϵ FOLLOWS: $
     public void declaration_list_prime() {
         print_rule("declaration_list_prime");
         Node declaration_list_prime = new Node("declaration_list_prime");
+        nodes.add(declaration_list_prime);
         if (tokens.isEmpty()) return;
-        if (nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
             declaration();
             declaration_list_prime();
         }
@@ -65,18 +75,31 @@ public class Parser {
     public void declaration() {
         print_rule("declaration");
         Node declaration = new Node("declaration");
+        nodes.add(declaration);
         if ( tokens.isEmpty() ) return;
         type_specifier();
         if ( nextCategory().equals("ID") ) {
+            declaration.addChildToken(nextToken());
             removeToken();
         }
         declaration_prime();
     }
 
+    // type specifier -> int | void FIRSTS: int void FOLLOWS: ID
+    public void type_specifier() {
+        print_rule("type_specifier");
+        Node type_specifier = new Node("type_specifier");
+        nodes.add(type_specifier);
+        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+            type_specifier.addChildToken(nextToken());
+            removeToken();
+        } else reject();
+    }
+
     //declaration_prime -> var-declaration_prime | fun-declaration FIRSTS: ( ; [ FOLLOWS: int void $
     public void declaration_prime() {
         print_rule("declaration_prime");
-        Node declaration_prime = new Node("declaration_prime");
+        nodes.add(new Node("declaration_prime"));
         if (tokens.isEmpty()) return;
         if (nextLexeme().equals("(")) {
             fun_declaration();
@@ -89,11 +112,14 @@ public class Parser {
     public void fun_declaration() {
         print_rule("fun_declaration");
         Node fun_declaration = new Node("fun_declaration");
+        nodes.add(fun_declaration);
         if ( tokens.isEmpty() ) return;
         if ( nextLexeme().equals("(") ) {
+            fun_declaration.addChildToken(nextToken());
             removeToken();
             params();
             if ( nextLexeme().equals(")") ) {
+                fun_declaration.addChildToken(nextToken());
                 removeToken();
                 compound_statement();
             }
@@ -104,17 +130,23 @@ public class Parser {
     public void var_declaration_prime() {
         print_rule("var_declaration_prime");
         Node var_declaration_prime = new Node("var_declaration_prime");
+        nodes.add(var_declaration_prime);
         if (tokens.isEmpty()) return;
         if ( nextLexeme().equals(";")) {
+            var_declaration_prime.addChildToken(nextToken());
             removeToken();
         }
         if ( nextLexeme().equals("[") ) {
+            var_declaration_prime.addChildToken(nextToken());
             removeToken();
             if ( nextCategory().equals("NUM") ) {
+                var_declaration_prime.addChildToken(nextToken());
                 removeToken();
                 if ( nextLexeme().equals("]") ) {
+                    var_declaration_prime.addChildToken(nextToken());
                     removeToken();
                     if ( nextLexeme().equals(";") ) {
+                        var_declaration_prime.addChildToken(nextToken());
                         removeToken();
                     }
                 }
@@ -122,28 +154,23 @@ public class Parser {
         }
     }
 
-    // type specifier -> int | void FIRSTS: int void FOLLOWS: ID
-    public void type_specifier() {
-        print_rule("type_specifier");
-        Node type_specifier = new Node("type_specifier");
-        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-            removeToken();
-        } else reject();
-    }
-
     // params -> int ID param_prime param-list_prime | void params_prime FIRSTS: int void FOLLOWS: )
     public void params() {
         print_rule("params");
         Node params = new Node("params");
+        nodes.add(params);
         if ( nextLexeme().equals("int") ) {
+            params.addChildToken(nextToken());
             removeToken();
             if ( nextCategory().equals("ID") ) {
+                params.addChildToken(nextToken());
                 removeToken();
                 param_prime();
                 param_list_prime();
             } else reject();
         }
         if ( nextLexeme().equals("void") ) {
+            params.addChildToken(nextToken());
             removeToken();
             params_prime();
         }
@@ -153,8 +180,10 @@ public class Parser {
     public void params_prime() {
         print_rule("params_prime");
         Node params_prime = new Node("params_prime");
+        nodes.add(params_prime);
         if ( nextLexeme().equals(")") ) return;
         if ( nextCategory().equals("ID") ) {
+            params_prime.addChildToken(nextToken());
             removeToken();
             param_prime();
             param_list_prime();
@@ -165,11 +194,14 @@ public class Parser {
     public void param_list_prime() {
         print_rule("param_list_prime");
         Node param_list_prime = new Node("param_list_prime");
+        nodes.add(param_list_prime);
         if ( nextLexeme().equals(")") ) return;
         if ( nextLexeme().equals(",") ) {
+            param_list_prime.addChildToken(nextToken());
             removeToken();
             type_specifier();
             if ( nextCategory().equals("ID") ) {
+                param_list_prime.addChildToken(nextToken());
                 removeToken();
                 param_prime();
                 param_list_prime();
@@ -182,10 +214,15 @@ public class Parser {
     public void param_prime() {
         print_rule("param_prime");
         Node param_prime = new Node("param_prime");
+        nodes.add(param_prime);
         if ( nextLexeme().equals(",") || nextLexeme().equals(")") ) return;
         if ( nextLexeme().equals("[") ) {
+            param_prime.addChildToken(nextToken());
             removeToken();
-            if ( nextLexeme().equals("]") ) removeToken(); else reject();
+            if ( nextLexeme().equals("]") ) {
+                param_prime.addChildToken(nextToken());
+                removeToken();
+            } else reject();
         }
     }
 
@@ -193,6 +230,7 @@ public class Parser {
     public void local_declarations() {
         print_rule("local_declarations");
         Node local_declarations = new Node("local_declarations");
+        nodes.add(local_declarations);
         if ( nextCategory().equals("ID") || nextCategory().equals("NUM") || nextLexeme().matches("\\(|;|if|return|while|\\{|}")) return;
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
             var_declaration();
@@ -204,8 +242,10 @@ public class Parser {
     public void var_declaration() {
         print_rule("var_declaration");
         Node var_declaration = new Node("var_declaration");
+        nodes.add(var_declaration);
         type_specifier();
         if ( nextCategory().equals("ID") ) {
+            var_declaration.addChildToken(nextToken());
             removeToken();
         } else reject();
         var_declaration_prime();
@@ -215,6 +255,7 @@ public class Parser {
     public void statement_list() {
         print_rule("statement_list");
         Node statement_list = new Node("statement_list");
+        nodes.add(statement_list);
         if ( nextLexeme().equals("}") ) return;
         if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().matches("\\(|;|if|return|while|\\{") ) {
             statement();
@@ -226,6 +267,7 @@ public class Parser {
     public void statement() {
         print_rule("statement");
         Node statement = new Node("statement");
+        nodes.add(statement);
         if ( nextLexeme().equals("(") || nextLexeme().equals(";") || nextCategory().equals("ID") || nextCategory().equals("NUM") ) expression_statement();
         if ( nextLexeme().equals("{") ) compound_statement();
         if ( nextLexeme().equals("if")) selection_statement();
@@ -237,10 +279,17 @@ public class Parser {
     public void expression_statement() {
         print_rule("expression_statement");
         Node expression_statement = new Node("expression_statement");
-        if ( nextLexeme().equals(";") ) removeToken();
+        nodes.add(expression_statement);
+        if ( nextLexeme().equals(";") ) {
+            expression_statement.addChildToken(nextToken());
+            removeToken();
+        }
         if ( nextLexeme().equals("(") || nextCategory().equals("ID") || nextCategory().equals("NUM") ) {
             expression();
-            if (nextLexeme().equals(";")) removeToken(); else reject();
+            if (nextLexeme().equals(";")) {
+                expression_statement.addChildToken(nextToken());
+                removeToken();
+            } else reject();
         }
     }
 
@@ -248,11 +297,16 @@ public class Parser {
     public void compound_statement() {
         print_rule("compound_statement");
         Node compound_statement = new Node("compound_statement");
+        nodes.add(compound_statement);
         if ( nextLexeme().equals("{") ) {
+            compound_statement.addChildToken(nextToken());
             removeToken();
             local_declarations();
             statement_list();
-            if ( nextLexeme().equals("}") ) removeToken(); else reject();
+            if ( nextLexeme().equals("}") ) {
+                compound_statement.addChildToken(nextToken());
+                removeToken();
+            } else reject();
         }
     }
 
@@ -260,12 +314,16 @@ public class Parser {
     public void selection_statement() {
         print_rule("selection_statement");
         Node selection_statement = new Node("selection_statement");
+        nodes.add(selection_statement);
         if ( nextLexeme().equals("if") ) {
+            selection_statement.addChildToken(nextToken());
             removeToken();
             if ( nextLexeme().equals("(") ) {
+                selection_statement.addChildToken(nextToken());
                 removeToken();
                 expression();
                 if ( nextLexeme().equals(")") ) {
+                    selection_statement.addChildToken(nextToken());
                     removeToken();
                     statement();
                     selection_statement_prime();
@@ -278,8 +336,10 @@ public class Parser {
     public void selection_statement_prime() {
         print_rule("selection_statement_prime");
         Node selection_statement_prime = new Node("selection_statement_prime");
+        nodes.add(selection_statement_prime);
         if (nextLexeme().matches("\\(|;|if|return|while|\\{|}") || nextCategory().equals("ID") || nextCategory().equals("NUM") ) return;
         if ( nextLexeme().equals("else") ) {
+            selection_statement_prime.addChildToken(nextToken());
             removeToken();
             statement();
         } else reject();
@@ -289,12 +349,16 @@ public class Parser {
     public void iteration_statement() {
         print_rule("iteration_statement");
         Node iteration_statement = new Node("iteration_statement");
+        nodes.add(iteration_statement);
         if ( nextLexeme().equals("while") ) {
+            iteration_statement.addChildToken(nextToken());
             removeToken();
             if ( nextLexeme().equals("(") ) {
+                iteration_statement.addChildToken(nextToken());
                 removeToken();
                 expression();
                 if ( nextLexeme().equals(")") ) {
+                    iteration_statement.addChildToken(nextToken());
                     removeToken();
                     statement();
                 } else reject();
@@ -306,7 +370,9 @@ public class Parser {
     public void return_statement() {
         print_rule("return_statement");
         Node return_statement = new Node("return_statement");
+        nodes.add(return_statement);
         if ( nextLexeme().equals("return") ) {
+            return_statement.addChildToken(nextToken());
             removeToken();
             return_statement_prime();
         } else reject();
@@ -316,11 +382,17 @@ public class Parser {
     public void return_statement_prime() {
         print_rule("return_statement_prime");
         Node return_statement_prime = new Node("return_statement_prime");
-        if ( nextLexeme().equals(";") ) removeToken();
-        if ( nextCategory().equals("NUM") || nextCategory().equals("ID") ||
-            nextLexeme().equals("(") ) {
+        nodes.add(return_statement_prime);
+        if ( nextLexeme().equals(";") ) {
+            return_statement_prime.addChildToken(nextToken());
+            removeToken();
+        }
+        if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().equals("(") ) {
             expression();
-            if ( nextLexeme().equals(";") ) removeToken(); else reject();
+            if ( nextLexeme().equals(";") ) {
+                return_statement_prime.addChildToken(nextToken());
+                removeToken();
+            } else reject();
         }
     }
 
@@ -328,16 +400,20 @@ public class Parser {
     public void expression() {
         print_rule("expression");
         Node expression = new Node("expression");
+        nodes.add(expression);
         if ( nextCategory().equals("NUM") ) {
+            expression.addChildToken(nextToken());
             removeToken();
             term_prime();
             additive_expression_prime();
             simple_expression_prime();
         }
         if ( nextLexeme().equals("(") ) {
+            expression.addChildToken(nextToken());
             removeToken();
             expression();
             if ( nextLexeme().equals(")") ) {
+                expression.addChildToken(nextToken());
                 removeToken();
                 term_prime();
                 additive_expression_prime();
@@ -345,6 +421,7 @@ public class Parser {
             } else reject();
         }
         if ( nextCategory().equals("ID") ) {
+            expression.addChildToken(nextToken());
             removeToken();
             expression_prime();
         }
@@ -354,29 +431,34 @@ public class Parser {
     public void expression_prime() {
         print_rule("expression_prime");
         Node expression_prime = new Node("expression_prime");
+        nodes.add(expression_prime);
         if ( nextLexeme().equals("=") ) {
+            expression_prime.addChildToken(nextToken());
             removeToken();
             expression();
         }
         if ( nextLexeme().equals("[") ) {
+            expression_prime.addChildToken(nextToken());
             removeToken();
             expression();
             if ( nextLexeme().equals("]") ) {
+                expression_prime.addChildToken(nextToken());
                 removeToken();
                 expression_prime_prime();
             } else reject();
         }
-        if ( nextLexeme().equals("*") || nextLexeme().equals("/") ||
-            nextLexeme().matches("<=|>=|==|!=|,|\\)|;|]|\\(|\\+|-|<|>") ||
+        if ( nextLexeme().equals("*") || nextLexeme().equals("/") || nextLexeme().matches("<=|>=|==|!=|,|\\)|;|]|\\(|\\+|-|<|>") ||
                 nextCategory().equals("NUM") || nextCategory().equals("ID") ) {
             term_prime();
             additive_expression_prime();
             simple_expression_prime();
         }
         if ( nextLexeme().equals("(") ) {
+            expression_prime.addChildToken(nextToken());
             removeToken();
             args();
             if ( nextLexeme().equals(")") ) {
+                expression_prime.addChildToken(nextToken());
                 removeToken();
                 term_prime();
                 additive_expression_prime();
@@ -389,7 +471,9 @@ public class Parser {
     public void expression_prime_prime() {
         print_rule("expression_prime_prime");
         Node expression_prime_prime = new Node("expression_prime_prime");
+        nodes.add(expression_prime_prime);
         if ( nextLexeme().equals("=") ) {
+            expression_prime_prime.addChildToken(nextToken());
             removeToken();
             expression();
         }
@@ -404,6 +488,7 @@ public class Parser {
     public void simple_expression_prime() {
         print_rule("simple_expression_prime");
         Node simple_expression_prime = new Node("simple_expression_prime");
+        nodes.add(simple_expression_prime);
         if ( nextLexeme().equals(",") || nextLexeme().equals(")") || nextLexeme().equals(";") || nextLexeme().equals("]") ) return;
         if ( nextLexeme().matches("<=|>=|==|!=|<|>") ) {
             relop();
@@ -415,13 +500,18 @@ public class Parser {
     public void relop() {
         print_rule("relop");
         Node relop = new Node("relop");
-        if ( nextLexeme().matches("<=|>=|==|!=|>|<") ) removeToken(); else reject();
+        nodes.add(relop);
+        if ( nextLexeme().matches("<=|>=|==|!=|>|<") ) {
+            relop.addChildToken(nextToken());
+            removeToken();
+        } else reject();
     }
 
     //additive-expression -> term additive-expression_prime FIRSTS: ID NUM ( FOLLOWS: , ) ; ]
     public void additive_expression() {
         print_rule("additive_expression");
         Node additive_expression = new Node("additive_expression");
+        nodes.add(additive_expression);
         if ( nextCategory().equals("ID") || nextCategory().equals("NUM") || nextLexeme().equals("(") ) {
             term();
             additive_expression_prime();
@@ -432,6 +522,7 @@ public class Parser {
     public void additive_expression_prime() {
         print_rule("additive_expresion_prime");
         Node additive_expression_prime = new Node("additive_expression_prime");
+        nodes.add(additive_expression_prime);
         if ( nextLexeme().matches("!=|\\)|,|;|<=|==|>=|]|<|>|\\(") || nextCategory().equals("NUM") || nextCategory().equals("ID") ) return;
         if ( nextLexeme().matches("\\+|-") ) {
             addop();
@@ -444,13 +535,18 @@ public class Parser {
     public void addop() {
         print_rule("addop");
         Node addop = new Node("addop");
-        if ( nextLexeme().matches("\\+|-") ) removeToken(); else reject();
+        nodes.add(addop);
+        if ( nextLexeme().matches("\\+|-") ) {
+            addop.addChildToken(nextToken());
+            removeToken();
+        } else reject();
     }
 
     // term -> factor term_prime FIRSTS: NUM ID ( FOLLOWS: + - <= < > >= == != , ) ; ] NUM ( ID
     public void term() {
         print_rule("term");
         Node term = new Node("term");
+        nodes.add(term);
         if ( nextCategory().equals("ID") || nextCategory().equals("NUM") || nextLexeme().equals("(") ) {
             factor();
             term_prime();
@@ -461,6 +557,7 @@ public class Parser {
     public void term_prime() {
         print_rule("term_prime");
         Node term_prime = new Node("term_prime");
+        nodes.add(term_prime);
         if ( nextLexeme().matches("!=|\\)|\\+|,|-|;|<=|==|>=|<|>|]|\\(") || nextCategory().equals("NUM") || nextCategory().equals("ID") ) return;
         if ( nextLexeme().equals("*") || nextLexeme().equals("/") ) {
             mulop();
@@ -473,40 +570,62 @@ public class Parser {
     public void mulop() {
         print_rule("mulop");
         Node mulop = new Node("mulop");
-        if ( nextLexeme().equals("*") || nextLexeme().equals("/") ) removeToken(); else reject();
+        nodes.add(mulop);
+        if ( nextLexeme().equals("*") || nextLexeme().equals("/") ) {
+            mulop.addChildToken(nextToken());
+            removeToken();
+        } else reject();
     }
 
     // factor -> ( expression ) | ID factor_prime | NUM FIRSTS: NUM ID ( FOLLOWS: * / + - <= < > >= == != , ) ; ] NUM ( ID
     public void factor() {
         print_rule("factor");
         Node factor = new Node("factor");
+        nodes.add(factor);
         if ( nextLexeme().equals("(") ) {
+            factor.addChildToken(nextToken());
             removeToken();
             expression();
-            if ( nextLexeme().equals(")") ) removeToken(); else reject();
+            if ( nextLexeme().equals(")") ) {
+                factor.addChildToken(nextToken());
+                removeToken();
+            } else reject();
         }
         if ( nextCategory().equals("ID") ) {
+            factor.addChildToken(nextToken());
             removeToken();
             factor_prime();
         }
-        if ( nextCategory().equals("NUM") ) { removeToken(); }
+        if ( nextCategory().equals("NUM") ) {
+            factor.addChildToken(nextToken());
+            removeToken();
+        }
     }
 
     // factor_prime -> [ expression ] | ( args ) | empty FIRSTS: [ ( empty FOLLOWS: NUM ID * / + - <= < > >= == != , ) ; ] (
     public void  factor_prime() {
         print_rule("factor_prime");
         Node factor_prime = new Node("factor_prime");
+        nodes.add(factor_prime);
         if ( tokens.isEmpty() ) return;
         if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().matches("<=|>=|==|!=|\\*|/|\\+|-|<|>|,|\\)|;|]|\\(") ) return;
         if ( nextLexeme().equals("[") ) {
+            factor_prime.addChildToken(nextToken());
             removeToken();
             expression();
-            if ( nextLexeme().equals("]") ) removeToken(); else reject();
+            if ( nextLexeme().equals("]") ) {
+                factor_prime.addChildToken(nextToken());
+                removeToken();
+            } else reject();
         }
         if ( nextLexeme().equals("(") ) {
+            factor_prime.addChildToken(nextToken());
             removeToken();
             args();
-            if ( nextLexeme().equals(")") ) removeToken(); else reject();
+            if ( nextLexeme().equals(")") ) {
+                factor_prime.addChildToken(nextToken());
+                removeToken();
+            } else reject();
         }
     }
 
@@ -514,6 +633,7 @@ public class Parser {
     public void args() {
         print_rule("args");
         Node args = new Node("args");
+        nodes.add(args);
         if ( nextLexeme().equals(")") ) return;
         if ( nextCategory().equals("ID") || nextCategory().equals("NUM") || nextLexeme().equals("(") ) arg_list();
     }
@@ -522,6 +642,7 @@ public class Parser {
     public void arg_list() {
         print_rule("arg_list");
         Node arg_list = new Node("arg_list");
+        nodes.add(arg_list);
         if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().equals("(") ) {
             expression();
             arg_list_prime();
@@ -532,8 +653,10 @@ public class Parser {
     public void arg_list_prime() {
         print_rule("arg_list_prime");
         Node arg_list_prime = new Node("arg_list_prime");
+        nodes.add(arg_list_prime);
         if ( nextLexeme().equals(")") ) return;
         if ( nextLexeme().equals(",") ) {
+            arg_list_prime.addChildToken(nextToken());
             removeToken();
             expression();
             arg_list_prime();
