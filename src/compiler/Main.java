@@ -26,15 +26,15 @@ public class Main {
         Parser parser = new Parser(tokens);
         System.out.println(parser.isAccepted() ? "ACCEPT" : "REJECT");
 
-        List<Node> nodes = new ArrayList<>();
+        ArrayDeque<Node> nodes = new ArrayDeque<>();
         nodes = parser.getNodes();
 
         System.out.println();
         for(Node n : nodes) {
-            System.out.println(n.getName() + "\nChildern: " + n.getChildNodes() + "\nLexemes: " + n.getChildTokens() + "\nScope: " + n.getScope() + "\n");
+            System.out.println(n.getNodeName() + "\nChild Nodes: " + n.getChildNodes() + "\nTokens: " + n.getChildTokens() + "\nScope: " + n.getScope() + "\n");
         }
 
-        //SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser);
+        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(nodes);
         //System.out.println(semanticAnalyzer.isAccepted() ? "ACCEPT" : "REJECT");
     }
 

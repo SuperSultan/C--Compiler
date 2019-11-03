@@ -7,15 +7,16 @@ public class Parser {
 
     private boolean isAccept;
     private ArrayDeque<Token> tokens;
-    private List<Node> nodes;
+    private ArrayDeque<Node> nodes;
+
 
     public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
         this.tokens = theTokens;
-        nodes = new ArrayList<>();
+        nodes = new ArrayDeque<>();
     }
 
-    public List<Node> getNodes() {
+    public ArrayDeque<Node> getNodes() {
         return nodes;
     }
 
@@ -31,7 +32,7 @@ public class Parser {
 
     public void print_rule(String rulename) {
         if ( tokens.getFirst() != null ) {
-            System.out.println(rulename + " " + nextLexeme());
+            //System.out.println(rulename + " " + nextLexeme());
          }
     }
 
@@ -57,6 +58,7 @@ public class Parser {
         nodes.add(declaration_list);
         if (tokens.isEmpty()) return;
             declaration_list.addChildNode("declaration");
+           // List<Symbol> symbols = new ArrayList<>();
             declaration();
             declaration_list.addChildNode("declaration_list_prime");
             declaration_list_prime();
@@ -78,10 +80,14 @@ public class Parser {
 
     //declaration -> type-specifier ID declaration_prime FIRSTS: int void FOLLOWS: $ int void
     public void declaration() {
+
+        Symbol symbol = new Symbol();
+
         print_rule("declaration");
         Node declaration = new Node("declaration");
         nodes.add(declaration);
         if ( tokens.isEmpty() ) return;
+        declaration.addChildNode("type_specifier");
         type_specifier();
         if ( nextCategory().equals("ID") ) {
             declaration.addChildToken(nextToken());
@@ -190,6 +196,22 @@ public class Parser {
         }
     }
 
+    // param_prime -> [ ] | empty FIRSTS: [ empty FOLLOWS: , )
+    public void param_prime() {
+        print_rule("param_prime");
+        Node param_prime = new Node("param_prime");
+        nodes.add(param_prime);
+        if ( nextLexeme().equals(",") || nextLexeme().equals(")") ) return;
+        if ( nextLexeme().equals("[") ) {
+            param_prime.addChildToken(nextToken());
+            removeToken();
+            if ( nextLexeme().equals("]") ) {
+                param_prime.addChildToken(nextToken());
+                removeToken();
+            } else reject();
+        }
+    }
+
     // params_prime -> ID param_prime param-list_prime | empty FIRSTS: ID empty FOLLOWS: )
     public void params_prime() {
         print_rule("params_prime");
@@ -226,22 +248,6 @@ public class Parser {
                 param_list_prime();
             } else reject();
 
-        }
-    }
-
-    // param_prime -> [ ] | empty FIRSTS: [ empty FOLLOWS: , )
-    public void param_prime() {
-        print_rule("param_prime");
-        Node param_prime = new Node("param_prime");
-        nodes.add(param_prime);
-        if ( nextLexeme().equals(",") || nextLexeme().equals(")") ) return;
-        if ( nextLexeme().equals("[") ) {
-            param_prime.addChildToken(nextToken());
-            removeToken();
-            if ( nextLexeme().equals("]") ) {
-                param_prime.addChildToken(nextToken());
-                removeToken();
-            } else reject();
         }
     }
 
