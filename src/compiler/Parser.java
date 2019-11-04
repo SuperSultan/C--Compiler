@@ -6,21 +6,24 @@ public class Parser {
     private boolean isAccept;
     private ArrayDeque<Token> tokens;
     private ArrayDeque<Node> nodes;
+    private Map<String,String> map;
+    private LinkedList<Map<String,String>> symbolTable;
+    private VariableScope varScope;
+    private FunctionScope funScope;
 
-    private static String identifier;
-    private static String type;
-    private static HashMap<String,String> symbol;
-    private static int index = 0;
-    private static List<HashMap<String,String>> symbols = new LinkedList<>();
-
+    private static String varIdentifier;
+    private static String funIdentifier;
+    private static String varType;
+    private static String funType;
 
     public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
         this.tokens = theTokens;
         nodes = new ArrayDeque<>();
+        varScope = new VariableScope();
+        funScope = new FunctionScope();
     }
 
-    public List<HashMap<String,String>> getSymbolTable() { return symbols; }
     public ArrayDeque<Node> getNodes() {
         return nodes;
     }
@@ -32,19 +35,9 @@ public class Parser {
 
     public boolean isAccepted() {
         program();
-        //symbolTableTest();
+        //scope.symbolTableTest();
+        funScope.verifyIntFunctions();
         return nextLexeme().equals("$") && isAccept;
-    }
-
-    public void symbolTableTest() {
-        System.out.println();
-        for(HashMap<String,String> maps : symbols) {
-            for(Map.Entry<String,String> entry : maps.entrySet() ) {
-                String identifier = entry.getKey();
-                String type = entry.getValue();
-                System.out.println("IDENTIFIER " + identifier + " TYPE: " + type + " SCOPE_LEVEL: " + symbols.indexOf(maps));
-            }
-        }
     }
 
     public void print_rule(String rulename) {
@@ -75,7 +68,6 @@ public class Parser {
         nodes.add(declaration_list);
         if (tokens.isEmpty()) return;
             declaration_list.addChildNode("declaration");
-           // List<Symbol> symbols = new ArrayList<>();
             declaration();
             declaration_list.addChildNode("declaration_list_prime");
             declaration_list_prime();
@@ -95,6 +87,19 @@ public class Parser {
         }
     }
 
+    // type specifier -> int | void FIRSTS: int void FOLLOWS: ID
+    public void type_specifier() {
+        print_rule("type_specifier");
+        Node type_specifier = new Node("type_specifier");
+        nodes.add(type_specifier);
+        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+            funType = nextLexeme();
+            varType = nextLexeme();
+            type_specifier.addChildToken(nextToken());
+            removeToken();
+        } else reject();
+    }
+
     //declaration -> type-specifier ID declaration_prime FIRSTS: int void FOLLOWS: $ int void
     public void declaration() {
         print_rule("declaration");
@@ -104,27 +109,13 @@ public class Parser {
         declaration.addChildNode("type_specifier");
         type_specifier();
         if ( nextCategory().equals("ID") ) {
-            identifier = nextLexeme();
-            HashMap<String,String> map = new HashMap<>();
-            map.put(identifier,type);
-            symbols.add(index, map);
+            funIdentifier = nextLexeme();
+            varIdentifier = nextLexeme();
             declaration.addChildToken(nextToken());
             removeToken();
         }
         declaration.addChildNode("declaration_prime");
         declaration_prime();
-    }
-
-    // type specifier -> int | void FIRSTS: int void FOLLOWS: ID
-    public void type_specifier() {
-        print_rule("type_specifier");
-        Node type_specifier = new Node("type_specifier");
-        nodes.add(type_specifier);
-        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-            type = nextLexeme();
-            type_specifier.addChildToken(nextToken());
-            removeToken();
-        } else reject();
     }
 
     //declaration_prime -> var-declaration_prime | fun-declaration FIRSTS: ( ; [ FOLLOWS: int void $
@@ -134,9 +125,13 @@ public class Parser {
         nodes.add(declaration_prime);
         if (tokens.isEmpty()) return;
         if (nextLexeme().equals("(")) {
+            funScope.put(funIdentifier, funType);
+            funIdentifier = null; funType = null;
             declaration_prime.addChildNode("fun_declaration");
             fun_declaration();
         } else {
+            varScope.put(varIdentifier, varType);
+            varIdentifier = null; varType = null;
             declaration_prime.addChildNode("var_declaration_prime");
             var_declaration_prime();
         }
@@ -196,14 +191,13 @@ public class Parser {
         Node params = new Node("params");
         nodes.add(params);
         if ( nextLexeme().equals("int") ) {
-            type = nextLexeme();
+            varType = nextLexeme();
             params.addChildToken(nextToken());
             removeToken();
             if ( nextCategory().equals("ID") ) {
-                identifier = nextLexeme();
-                HashMap<String, String> map = new HashMap<>();
-                map.put(identifier, type);
-                symbols.add(index, map);
+                varIdentifier = nextLexeme();
+                varScope.put(varIdentifier, varType);
+                varIdentifier = null; varType = null;
                 params.addChildToken(nextToken());
                 removeToken();
                 params.addChildNode("param_prime");
@@ -213,6 +207,9 @@ public class Parser {
             } else reject();
         }
         if ( nextLexeme().equals("void") ) {
+            varIdentifier = nextLexeme();
+            varScope.put(varIdentifier, varType);
+            varIdentifier = null; varType = null;
             params.addChildToken(nextToken());
             removeToken();
             params.addChildNode("params_prime");
@@ -243,6 +240,9 @@ public class Parser {
         nodes.add(params_prime);
         if ( nextLexeme().equals(")") ) return;
         if ( nextCategory().equals("ID") ) {
+            varIdentifier = nextLexeme();
+            varScope.put(varIdentifier,varType);
+            varIdentifier = null; varType = null;
             params_prime.addChildToken(nextToken());
             removeToken();
             params_prime.addChildNode("param_prime");
@@ -264,10 +264,9 @@ public class Parser {
             param_list_prime.addChildNode("type_specifier");
             type_specifier();
             if ( nextCategory().equals("ID") ) {
-                identifier = nextLexeme();
-                HashMap<String,String> map = new HashMap<>();
-                map.put(identifier,type);
-                symbols.add(index,map);
+                varIdentifier = nextLexeme();
+                varScope.put(varIdentifier,varType);
+                varIdentifier = null; varType = null;
                 param_list_prime.addChildToken(nextToken());
                 removeToken();
                 param_list_prime.addChildNode("param_prime");
@@ -301,10 +300,9 @@ public class Parser {
         var_declaration.addChildNode("type_specifier");
         type_specifier();
         if ( nextCategory().equals("ID") ) {
-            identifier = nextLexeme();
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put(identifier, type);
-            symbols.add(index, map);
+            varIdentifier = nextLexeme();
+            varScope.put(varIdentifier, varType);
+            varIdentifier = null; varType = null;
             var_declaration.addChildToken(nextToken());
             removeToken();
         } else reject();
@@ -378,7 +376,8 @@ public class Parser {
         Node compound_statement = new Node("compound_statement");
         nodes.add(compound_statement);
         if ( nextLexeme().equals("{") ) {
-            index++;
+            varScope.createNewScope();
+            funScope.createNewScope();
             compound_statement.addChildToken(nextToken());
             removeToken();
             compound_statement.addChildNode("local_declarations");
@@ -386,7 +385,8 @@ public class Parser {
             compound_statement.addChildNode("statement_list");
             statement_list();
             if ( nextLexeme().equals("}") ) {
-                index--;
+                varScope.removeScope();
+                funScope.removeScope();
                 compound_statement.addChildToken(nextToken());
                 removeToken();
             } else reject();
@@ -461,6 +461,7 @@ public class Parser {
         Node return_statement = new Node("return_statement");
         nodes.add(return_statement);
         if ( nextLexeme().equals("return") ) {
+            funType = nextLexeme();
             return_statement.addChildToken(nextToken());
             removeToken();
             return_statement.addChildNode("return_statement_prime");
@@ -474,6 +475,9 @@ public class Parser {
         Node return_statement_prime = new Node("return_statement_prime");
         nodes.add(return_statement_prime);
         if ( nextLexeme().equals(";") ) {
+            funIdentifier = "empty";
+            funScope.put(funIdentifier,funType);
+            funIdentifier= null; funType = null;
             return_statement_prime.addChildToken(nextToken());
             removeToken();
         }
@@ -487,12 +491,15 @@ public class Parser {
         }
     }
 
-    // expression ->  NUM term_prime additive-expression_prime simple-expression_prime | ( expression ) term_prime additive-expression_prime simple-expression_prime | ID expression_prime FIRSTS: NUM ( ID FOLLOWS: , ) ; ]
+    // expression ->  NUM term_prime additive-expression_prime simple-expression_prime | ID expression_prime | ( expression ) term_prime additive-expression_prime simple-expression_prime FIRSTS: NUM ( ID FOLLOWS: , ) ; ]
     public void expression() {
         print_rule("expression");
         Node expression = new Node("expression");
         nodes.add(expression);
         if ( nextCategory().equals("NUM") ) {
+            funIdentifier = nextLexeme();
+            funScope.put(funIdentifier,funType);
+            funIdentifier = null; funType = null;
             expression.addChildToken(nextToken());
             removeToken();
             expression.addChildNode("term_prime");
@@ -501,6 +508,15 @@ public class Parser {
             additive_expression_prime();
             expression.addChildNode("simple_expression_prime");
             simple_expression_prime();
+        }
+        if ( nextCategory().equals("ID") ) {
+            funIdentifier = nextLexeme();
+            funScope.put(funIdentifier,funType);
+            funIdentifier = null; funType = null;
+            expression.addChildToken(nextToken());
+            removeToken();
+            expression.addChildNode("expression_prime");
+            expression_prime();
         }
         if ( nextLexeme().equals("(") ) {
             expression.addChildToken(nextToken());
@@ -517,12 +533,6 @@ public class Parser {
                 expression.addChildNode("simple_expression_prime");
                 simple_expression_prime();
             } else reject();
-        }
-        if ( nextCategory().equals("ID") ) {
-            expression.addChildToken(nextToken());
-            removeToken();
-            expression.addChildNode("expression_prime");
-            expression_prime();
         }
     }
 

@@ -7,7 +7,9 @@ import java.util.List;
 
 public class SemanticAnalyzer {
     ArrayDeque<Node> nodes;
-    Symbol symbol;
+    //Symbol symbol;
+    VariableScope variableScope;
+    FunctionScope functionScope;
     List<HashMap<String, String>> theSymbols; // identifier, type
 
     SemanticAnalyzer(ArrayDeque<Node> parseTreeNodes) {
@@ -17,9 +19,9 @@ public class SemanticAnalyzer {
     public boolean isAccepted() {
         return true;
     }
-
-    public Symbol createSymbol(Node n) {
-        Symbol symbol = new Symbol();
+/*
+    public Scope createSymbol(Node n) {
+        Scope scope = new Scope();
         Node current = nodes.getFirst();
         String nodeName = current.getNodeName();
         List<String> childTokens = current.getChildTokens();
@@ -146,26 +148,15 @@ public class SemanticAnalyzer {
                 System.out.println("Error, unrecognized node type!");
         }
         nodes.removeFirst();
-        return symbol;
+        return scope;
     }
-
+*/
     public void program(List<String> childNodes) {
         // check if declaration_list is not null
      //   if ( nodeName.equals(""))
     }
 
     public void declaration() {}
-
-
-
-    public List<HashMap<String, String>> createSymbolTable(Symbol s) {
-        List<HashMap<String, String>> theSymbols = new LinkedList<>();
-        while ( !nodes.isEmpty() ) {
-            createSymbol(nodes.getFirst());
-            nodes.removeFirst();
-        }
-        return theSymbols;
-    }
 
 
 

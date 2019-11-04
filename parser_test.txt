@@ -1,10 +1,5 @@
 /* assumes your lexer is working properly */
 
-int scopeTest(int a[], int b) { // this should ACCEPT. c and d are in scope level 1.
-    a[0] = 1;
-    {
-        int c;
-        int d;
-    }
-    return a;
+int scopeTest(int a[], int b) {
+    return;
 }
