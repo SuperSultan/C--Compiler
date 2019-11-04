@@ -1,10 +1,7 @@
 package compiler;
 import java.io.IOException;
 import java.io.File;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.List;
+import java.util.*;
 
 public class Main {
 
@@ -26,9 +23,21 @@ public class Main {
         Parser parser = new Parser(tokens);
         System.out.println(parser.isAccepted() ? "ACCEPT" : "REJECT");
 
+        //List<HashMap<String,String>> symbol_table = new LinkedList<>();
+        //symbol_table = parser.getSymbolTable();
+
         ArrayDeque<Node> nodes = new ArrayDeque<>();
         nodes = parser.getNodes();
-
+/*
+        System.out.println();
+        for(HashMap<String,String> maps : symbol_table) {
+            for(Map.Entry<String,String> entry : maps.entrySet()) {
+                String identifier = entry.getKey();
+                String value = entry.getValue();
+                System.out.println("IDENTIFIER: " + identifier + " TYPE: " + value);
+            }
+        }
+*/
         System.out.println();
         for(Node n : nodes) {
             System.out.println(n.getNodeName() + "\nChild Nodes: " + n.getChildNodes() + "\nTokens: " + n.getChildTokens() + "\nScope: " + n.getScope() + "\n");

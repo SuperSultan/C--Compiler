@@ -1,13 +1,17 @@
 package compiler;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Parser {
 
     private boolean isAccept;
     private ArrayDeque<Token> tokens;
     private ArrayDeque<Node> nodes;
+
+    private static String identifier;
+    private static String type;
+    private static HashMap<String,String> symbol;
+    private static int index = 0;
+    private static List<HashMap<String,String>> symbols = new LinkedList<>();
 
 
     public Parser (ArrayDeque<Token> theTokens) {
@@ -16,6 +20,7 @@ public class Parser {
         nodes = new ArrayDeque<>();
     }
 
+    public List<HashMap<String,String>> getSymbolTable() { return symbols; }
     public ArrayDeque<Node> getNodes() {
         return nodes;
     }
@@ -27,12 +32,24 @@ public class Parser {
 
     public boolean isAccepted() {
         program();
+        //symbolTableTest();
         return nextLexeme().equals("$") && isAccept;
+    }
+
+    public void symbolTableTest() {
+        System.out.println();
+        for(HashMap<String,String> maps : symbols) {
+            for(Map.Entry<String,String> entry : maps.entrySet() ) {
+                String identifier = entry.getKey();
+                String type = entry.getValue();
+                System.out.println("IDENTIFIER " + identifier + " TYPE: " + type + " SCOPE_LEVEL: " + symbols.indexOf(maps));
+            }
+        }
     }
 
     public void print_rule(String rulename) {
         if ( tokens.getFirst() != null ) {
-            //System.out.println(rulename + " " + nextLexeme());
+            System.out.println(rulename + " " + nextLexeme());
          }
     }
 
@@ -80,9 +97,6 @@ public class Parser {
 
     //declaration -> type-specifier ID declaration_prime FIRSTS: int void FOLLOWS: $ int void
     public void declaration() {
-
-        Symbol symbol = new Symbol();
-
         print_rule("declaration");
         Node declaration = new Node("declaration");
         nodes.add(declaration);
@@ -90,6 +104,10 @@ public class Parser {
         declaration.addChildNode("type_specifier");
         type_specifier();
         if ( nextCategory().equals("ID") ) {
+            identifier = nextLexeme();
+            HashMap<String,String> map = new HashMap<>();
+            map.put(identifier,type);
+            symbols.add(index, map);
             declaration.addChildToken(nextToken());
             removeToken();
         }
@@ -103,6 +121,7 @@ public class Parser {
         Node type_specifier = new Node("type_specifier");
         nodes.add(type_specifier);
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+            type = nextLexeme();
             type_specifier.addChildToken(nextToken());
             removeToken();
         } else reject();
@@ -177,9 +196,14 @@ public class Parser {
         Node params = new Node("params");
         nodes.add(params);
         if ( nextLexeme().equals("int") ) {
+            type = nextLexeme();
             params.addChildToken(nextToken());
             removeToken();
             if ( nextCategory().equals("ID") ) {
+                identifier = nextLexeme();
+                HashMap<String, String> map = new HashMap<>();
+                map.put(identifier, type);
+                symbols.add(index, map);
                 params.addChildToken(nextToken());
                 removeToken();
                 params.addChildNode("param_prime");
@@ -240,6 +264,10 @@ public class Parser {
             param_list_prime.addChildNode("type_specifier");
             type_specifier();
             if ( nextCategory().equals("ID") ) {
+                identifier = nextLexeme();
+                HashMap<String,String> map = new HashMap<>();
+                map.put(identifier,type);
+                symbols.add(index,map);
                 param_list_prime.addChildToken(nextToken());
                 removeToken();
                 param_list_prime.addChildNode("param_prime");
@@ -273,6 +301,10 @@ public class Parser {
         var_declaration.addChildNode("type_specifier");
         type_specifier();
         if ( nextCategory().equals("ID") ) {
+            identifier = nextLexeme();
+            HashMap<String, String> map = new HashMap<String, String>();
+            map.put(identifier, type);
+            symbols.add(index, map);
             var_declaration.addChildToken(nextToken());
             removeToken();
         } else reject();
@@ -346,6 +378,7 @@ public class Parser {
         Node compound_statement = new Node("compound_statement");
         nodes.add(compound_statement);
         if ( nextLexeme().equals("{") ) {
+            index++;
             compound_statement.addChildToken(nextToken());
             removeToken();
             compound_statement.addChildNode("local_declarations");
@@ -353,6 +386,7 @@ public class Parser {
             compound_statement.addChildNode("statement_list");
             statement_list();
             if ( nextLexeme().equals("}") ) {
+                index--;
                 compound_statement.addChildToken(nextToken());
                 removeToken();
             } else reject();
