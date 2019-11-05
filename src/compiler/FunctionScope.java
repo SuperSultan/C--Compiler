@@ -4,11 +4,11 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FunctionScope extends HashMap {
-    String funIdentifier;
-    String dataType;
-    LinkedList<Map<String,String>> symbolTable;
-    Map<String,String> symbol;
+public class FunctionScope {
+    private String funIdentifier;
+    private String dataType;
+    private LinkedList<Map<String,String>> symbolTable;
+    private Map<String,String> symbol;
 
     FunctionScope() {
         this.funIdentifier = null;
@@ -53,29 +53,29 @@ public class FunctionScope extends HashMap {
     }
 
     public void verifyIntFunctions() {
-        //for(int i=0;i<symbolTable.size(); i++) {
-         //   for(Map.Entry<String,String> entry : this.entrySet() ) {
-         //       if ( entry.getKey().equals("empty") && entry.getValue().equals("return") && symbol.containsValue("int") ) {
-          //          System.out.println("Error: int function returning no value");
-             //   }
+        for(Map.Entry<String,String> entry : symbol.entrySet() ) {
+            if ( entry.getKey().equals("empty") && entry.getValue().equals("return") && symbol.containsValue("int") ) {
+                System.out.println("Error: int function returning no value");
+                reject();
             }
-        //}
-    //}
+            if ( !entry.getKey().equals("empty") && entry.getValue().equals("return") && symbol.containsValue("void") ) {
+                System.out.println("Error: void function returns a value!");
+                reject();
+            }
+            if ( !symbol.containsValue("return") && symbol.containsValue("int") ) { //TODO this is causing issues when void return type and no return
+                System.out.println("Error: int function with no return!");
+                reject();
+            }
+        }
+    }
 
 
-    @Override
-    public Object put(Object identifier, Object keyword) {
-        if (this.containsKey(identifier)) {
+    public void put(String identifier, String keyword) {
+        if (symbol.containsKey(identifier)) {
             System.out.println("Error: identifier " + identifier + " already defined!");
             reject();
-            return null;
-        }
-       // if ( identifier.equals("empty") && keyword.equals("return") && this.containsKey("int") ) {
-       //     System.out.println("Error: int function without a return!");
-        //    reject();
-        //    return null;
-        else {
-            return super.put(identifier, keyword);
+        } else {
+            symbol.put(identifier, keyword);
         }
     }
 

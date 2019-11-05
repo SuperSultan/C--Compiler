@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedList;
 
-public class VariableScope extends HashMap {
+public class VariableScope {
     String varIdentifier;
     String dataType;
     Map<String,String> symbol;
@@ -53,19 +53,25 @@ public class VariableScope extends HashMap {
         }
     }
 
-    @Override
-    public Object put(Object identifier, Object keyword) {
-        if (this.containsKey(identifier)) {
+    public void verifyVariableScope() {
+        for(Map.Entry<String,String> entry : symbol.entrySet() ) {
+            if ( symbol.containsValue(null) ) {
+                System.out.println("Error: Referencing variable with null value (null pointer exception");
+                reject();
+            }
+        }
+    }
+
+    public void put(String identifier, String keyword) {
+        if (symbol.containsKey(identifier)) {
             System.out.println("Error: " + identifier + " already defined!");
             reject();
-            return null;
         }
         if (keyword.equals("void") ) {
             System.out.println("Error, identifiers cannot be void!");
             reject();
-            return null;
         } else {
-            return super.put(identifier, keyword);
+            symbol.put(identifier,keyword);
         }
     }
 

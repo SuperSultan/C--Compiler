@@ -7,9 +7,11 @@ public class Parser {
     private ArrayDeque<Token> tokens;
     private ArrayDeque<Node> nodes;
     private Map<String,String> map;
-    private LinkedList<Map<String,String>> symbolTable;
+    private LinkedList<Map<String,String>> functionSymbolTable;
+    private LinkedList<Map<String,String>> variableSymbolTable;
     private VariableScope varScope;
     private FunctionScope funScope;
+
 
     private static String varIdentifier;
     private static String funIdentifier;
@@ -33,10 +35,18 @@ public class Parser {
     public String nextToken() { return tokens.getFirst().getLexeme(); }
     public void removeToken() { tokens.removeFirst(); }
 
+    public FunctionScope getFunScope() {
+        return this.funScope;
+    }
+    public VariableScope getVarScope() {
+        return this.varScope;
+    }
+
     public boolean isAccepted() {
         program();
-        //scope.symbolTableTest();
+        varScope.verifyVariableScope();
         funScope.verifyIntFunctions();
+        //varScope.verifyVariableScope();
         return nextLexeme().equals("$") && isAccept;
     }
 

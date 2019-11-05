@@ -28,16 +28,7 @@ public class Main {
 
         ArrayDeque<Node> nodes = new ArrayDeque<>();
         nodes = parser.getNodes();
-/*
-        System.out.println();
-        for(Map<String,String> maps : symbol_table) {
-            for(Map.Entry<String,String> entry : maps.entrySet()) {
-                String identifier = entry.getKey();
-                String value = entry.getValue();
-                System.out.println("IDENTIFIER: " + identifier + " TYPE: " + value);
-            }
-        }
-        */
+
         System.out.println();
         for(Node n : nodes) {
         //    System.out.println(n.getNodeName() + "\nChild Nodes: " + n.getChildNodes() + "\nTokens: " + n.getChildTokens() + "\nScope: " + n.getScope() + "\n");

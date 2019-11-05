@@ -1,5 +1,7 @@
 /* assumes your lexer is working properly */
 
-int scopeTest(int a[], int b) {
-    return;
+void hi() {
+    int a;
+    int b;
+    funDecTest(a,b);
 }
