@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedList;
 
-public class VariableScope {
-    String varIdentifier;
-    String dataType;
-    Map<String,String> symbol;
-    LinkedList<Map<String,String>> symbolTable;
+public class Variable {
+    private String varIdentifier;
+    private String dataType;
+    private Map<String,String> symbol;
+    private LinkedList<Map<String,String>> symbolTable;
 
-    VariableScope() {
+    Variable() {
         this.varIdentifier = null;
         this.dataType = null;
         symbol = new HashMap<>();
@@ -18,21 +18,24 @@ public class VariableScope {
         symbolTable.add(symbol);
     }
 
-    public void setIdentifier(String id) {
+    public void setVariableIdentifier(String id) {
         this.varIdentifier = id;
     }
 
-    public void setDataType(String dT) {
+    public void setVariableType(String dT) {
         this.dataType = dT;
     }
+
+    public String getVariableIdentifier() { return this.varIdentifier; }
+    public String getVariableType() { return this.dataType; }
 
     public void reject() {
         System.out.println("REJECT");
         System.exit(0);
     }
 
-    public void symbolTableTest() {
-        System.out.println();
+    private void variableSymbolTableTest() {
+        if ( symbolTable.size() == 0 ) System.out.println("Empty variableSymbolTable");
         for(int i=0; i<symbolTable.size(); i++) {
             for(Map.Entry<String,String> entry : symbol.entrySet() ) {
                 String variable = entry.getKey();
@@ -51,6 +54,8 @@ public class VariableScope {
         if ( !symbolTable.isEmpty() ) {
             symbolTable.remove();
         }
+        System.out.println("Deleted variable scope");
+        this.variableSymbolTableTest();
     }
 
     public void verifyVariableScope() {
@@ -62,11 +67,18 @@ public class VariableScope {
         }
     }
 
-    public void put(String identifier, String keyword) {
-        if (symbol.containsKey(identifier)) {
-            System.out.println("Error: " + identifier + " already defined!");
-            reject();
+    public void checkDuplicates(String identifier, String keyword) {
+        for(Map.Entry<String,String> entry: symbol.entrySet() ) {
+            if ( entry.getKey().equals(identifier) ) {
+                System.out.println("Error: " + identifier + " was already defined");
+            }
         }
+    }
+
+    public void put(String identifier, String keyword) {
+
+        checkDuplicates(identifier, keyword);
+
         if (keyword.equals("void") ) {
             System.out.println("Error, identifiers cannot be void!");
             reject();

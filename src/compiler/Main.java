@@ -26,14 +26,6 @@ public class Main {
         //LinkedList<Map<String,String>> symbol_table = new LinkedList<>();
         //symbol_table = parser.getSymbolTable();
 
-        ArrayDeque<Node> nodes = new ArrayDeque<>();
-        nodes = parser.getNodes();
-
-        System.out.println();
-        for(Node n : nodes) {
-        //    System.out.println(n.getNodeName() + "\nChild Nodes: " + n.getChildNodes() + "\nTokens: " + n.getChildTokens() + "\nScope: " + n.getScope() + "\n");
-        }
-
         //SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(nodes);
         //System.out.println(semanticAnalyzer.isAccepted() ? "ACCEPT" : "REJECT");
     }

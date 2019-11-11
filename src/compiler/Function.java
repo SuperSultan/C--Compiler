@@ -4,34 +4,35 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FunctionScope {
+public class Function {
     private String funIdentifier;
     private String dataType;
     private LinkedList<Map<String,String>> symbolTable;
     private Map<String,String> symbol;
 
-    FunctionScope() {
+    Function() {
         this.funIdentifier = null;
         this.dataType = null;
         this.symbolTable = new LinkedList<Map<String,String>>();
         this.symbol = new HashMap<String, String>();
     }
 
-    public void setIdentifier(String id) {
+    public void setFunctionIdentifier(String id) {
         this.funIdentifier = id;
     }
-
-    public void setDataType(String dT) {
+    public void setFunctionType(String dT) {
         this.dataType = dT;
     }
+    public String getFunctionType() { return this.dataType; }
+    public String getFunctionIdentifier() { return this.funIdentifier; }
 
     public void reject() {
         System.out.println("REJECT");
         System.exit(0);
     }
 
-    public void symbolTableTest() {
-        System.out.println();
+    public void functionSymbolTableTest() {
+        if ( symbolTable.size() == 0) System.out.println("Empty functionSymbolTable");
         for(int i=0; i<symbolTable.size(); i++) {
             for(Map.Entry<String,String> entry : symbol.entrySet() ) {
                 String variable = entry.getKey();
@@ -44,12 +45,15 @@ public class FunctionScope {
     public void createNewScope() {
         Map<String,String> new_scope = new HashMap<>();
         symbolTable.add(new_scope);
+        System.out.println("Created new function scope");
     }
 
     public void removeScope() {
         if ( !symbolTable.isEmpty() ) {
             symbolTable.remove();
         }
+        System.out.println("Deleted function scope");
+        this.functionSymbolTableTest();
     }
 
     public void verifyIntFunctions() {
