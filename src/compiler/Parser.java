@@ -6,17 +6,13 @@ public class Parser {
     private boolean isAccept;
     private ArrayDeque<Token> tokens;
     private ArrayDeque<Node> nodes;
-    private Map<String,String> map;
-    private LinkedList<Map<String,String>> functionSymbolTable;
-    private LinkedList<Map<String,String>> variableSymbolTable;
     private VariableScope varScope;
     private FunctionScope funScope;
 
-
-    private static String varIdentifier;
-    private static String funIdentifier;
-    private static String varType;
-    private static String funType;
+    //private static String varIdentifier;
+    //private static String funIdentifier;
+    //private static String varType;
+    //private static String funType;
 
     public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
@@ -103,6 +99,7 @@ public class Parser {
         Node type_specifier = new Node("type_specifier");
         nodes.add(type_specifier);
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+
             funType = nextLexeme();
             varType = nextLexeme();
             type_specifier.addChildToken(nextToken());
@@ -119,8 +116,10 @@ public class Parser {
         declaration.addChildNode("type_specifier");
         type_specifier();
         if ( nextCategory().equals("ID") ) {
-            funIdentifier = nextLexeme();
-            varIdentifier = nextLexeme();
+            varScope.setIdentifier(nextLexeme());
+            funScope.setIdentifier(nextLexeme());
+            //funIdentifier = nextLexeme();
+            //varIdentifier = nextLexeme();
             declaration.addChildToken(nextToken());
             removeToken();
         }
@@ -135,6 +134,7 @@ public class Parser {
         nodes.add(declaration_prime);
         if (tokens.isEmpty()) return;
         if (nextLexeme().equals("(")) {
+            String funIdentifier = funScope.
             funScope.put(funIdentifier, funType);
             funIdentifier = null; funType = null;
             declaration_prime.addChildNode("fun_declaration");

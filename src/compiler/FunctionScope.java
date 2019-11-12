@@ -5,25 +5,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FunctionScope {
-    private String funIdentifier;
+    private String identifier;
     private String dataType;
     private LinkedList<Map<String,String>> symbolTable;
     private Map<String,String> symbol;
 
     FunctionScope() {
-        this.funIdentifier = null;
+        this.identifier = null;
         this.dataType = null;
         this.symbolTable = new LinkedList<Map<String,String>>();
         this.symbol = new HashMap<String, String>();
     }
 
     public void setIdentifier(String id) {
-        this.funIdentifier = id;
+        this.identifier = id;
     }
+
+    public String getIdentifier() { return this.identifier; }
 
     public void setDataType(String dT) {
         this.dataType = dT;
     }
+
+    public String getDataType() { return this.dataType; }
 
     public void reject() {
         System.out.println("REJECT");
