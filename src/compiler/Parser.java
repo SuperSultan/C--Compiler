@@ -11,8 +11,8 @@ public class Parser {
     public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
         this.tokens = theTokens;
-        variable = new Variable();
         function = new Function();
+        variable = new Variable();
     }
 
     public String nextLexeme() { return tokens.getFirst().getLexeme(); }
@@ -21,8 +21,7 @@ public class Parser {
 
     public boolean isAccepted() {
         program();
-        variable.verifyVariableScope();
-        function.verifyIntFunctions();
+        function.verifyFunctions();
         variable.verifyVariableScope();
         function.functionSymbolTableTest();
         return nextLexeme().equals("$") && isAccept;
@@ -70,8 +69,6 @@ public class Parser {
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
             function.setFunctionType(nextLexeme());
             variable.setVariableType(nextLexeme());
-            //funType = nextLexeme();
-            //varType = nextLexeme();
             removeToken();
         } else reject();
     }
@@ -82,8 +79,6 @@ public class Parser {
         if ( tokens.isEmpty() ) return;
         type_specifier();
         if ( nextCategory().equals("ID") ) {
-            //funIdentifier = nextLexeme();
-            //varIdentifier = nextLexeme();
             function.setFunctionIdentifier(nextLexeme());
             variable.setVariableIdentifier(nextLexeme());
             removeToken();
@@ -96,29 +91,9 @@ public class Parser {
         print_rule("declaration_prime");
         if (tokens.isEmpty()) return;
         if (nextLexeme().equals("(")) {
-            function.put(function.getFunctionIdentifier(), function.getFunctionType());
-            function.setFunctionIdentifier(null); function.setFunctionType(null);
-            //funIdentifier = null; funType = null;
             fun_declaration();
         } else {
-            variable.put(variable.getVariableIdentifier(), variable.getVariableType());
-            variable.setVariableIdentifier(null); variable.setVariableType(null);
-            //varIdentifier = null; varType = null;
             var_declaration_prime();
-        }
-    }
-
-    //fun-dclaration -> ( params ) compound-stmt FIRSTS: ( FOLLOWS: int void $
-    public void fun_declaration() {
-        print_rule("fun_declaration");
-        if ( tokens.isEmpty() ) return;
-        if ( nextLexeme().equals("(") ) {
-            removeToken();
-            params();
-            if ( nextLexeme().equals(")") ) {
-                removeToken();
-                compound_statement();
-            }
         }
     }
 
@@ -126,16 +101,11 @@ public class Parser {
     public void var_declaration_prime() {
         print_rule("var_declaration_prime");
         if (tokens.isEmpty()) return;
-        if ( nextLexeme().equals(";")) {
+        if ( nextLexeme().equals(";"))
             removeToken();
-        }
         if ( nextLexeme().equals("[") ) {
             removeToken();
             if ( nextCategory().equals("NUM") ) {
-                String type = variable.getVariableType();
-                if ( type != "int" ) {
-                    System.out.println("ERROR: " + type + " is invalid for array indeces"); // Array index agreement
-                }
                 removeToken();
                 if ( nextLexeme().equals("]") ) {
                     removeToken();
@@ -143,6 +113,21 @@ public class Parser {
                         removeToken();
                     }
                 }
+            }
+        }
+    }
+
+    //fun-declaration -> ( params ) compound-stmt FIRSTS: ( FOLLOWS: int void $
+    public void fun_declaration() {
+        print_rule("fun_declaration");
+        if ( tokens.isEmpty() ) return;
+        if ( nextLexeme().equals("(") ) {
+            variable.createNewScope();
+            removeToken();
+            params();
+            if ( nextLexeme().equals(")") ) {
+                removeToken();
+                compound_statement();
             }
         }
     }
@@ -156,7 +141,6 @@ public class Parser {
             if ( nextCategory().equals("ID") ) {
                 variable.setVariableIdentifier(nextLexeme());
                 variable.put(variable.getVariableIdentifier(), variable.getVariableType());
-                variable.setVariableIdentifier(null); variable.setVariableType(null);
                 removeToken();
                 param_prime();
                 param_list_prime();
@@ -176,7 +160,6 @@ public class Parser {
         if ( nextCategory().equals("ID") ) {
             variable.setVariableIdentifier(nextLexeme());
             variable.put(variable.getVariableIdentifier(),variable.getVariableType());
-            variable.setVariableIdentifier(null); variable.setVariableType(null);
             removeToken();
             param_prime();
             param_list_prime();
@@ -205,12 +188,10 @@ public class Parser {
             if ( nextCategory().equals("ID") ) {
                 variable.setVariableIdentifier(nextLexeme());
                 variable.put(variable.getVariableIdentifier(),variable.getVariableType());
-                variable.setVariableIdentifier(null); variable.setVariableType(null);
                 removeToken();
                 param_prime();
                 param_list_prime();
             } else reject();
-
         }
     }
 
@@ -231,7 +212,6 @@ public class Parser {
         if ( nextCategory().equals("ID") ) {
             variable.setVariableIdentifier(nextLexeme());
             variable.put(variable.getVariableIdentifier(), variable.getVariableType());
-            variable.setVariableIdentifier(null); variable.setVariableType(null);
             removeToken();
         } else reject();
         var_declaration_prime();
@@ -250,29 +230,23 @@ public class Parser {
     // statement -> expression-stmt | compound-stmt | selection-stmt | iteration-stmt | return-stmt FIRSTS: NUM ID ( ; { if while return FOLLOWS: NUM ID ( ; { if while return }
     public void statement() {
         print_rule("statement");
-        if ( nextLexeme().equals("(") || nextLexeme().equals(";") || nextCategory().equals("ID") || nextCategory().equals("NUM") ) {
+        if ( nextLexeme().equals("(") || nextLexeme().equals(";") || nextCategory().equals("ID") || nextCategory().equals("NUM") )
             expression_statement();
-        }
-        if ( nextLexeme().equals("{") ) {
+        if ( nextLexeme().equals("{") )
             compound_statement();
-        }
-        if ( nextLexeme().equals("if")) {
+        if ( nextLexeme().equals("if"))
             selection_statement();
-        }
-        if ( nextLexeme().equals("while") ) {
+        if ( nextLexeme().equals("while") )
             iteration_statement();
-        }
-        if ( nextLexeme().equals("return") ) {
+        if ( nextLexeme().equals("return") )
             return_statement();
-        }
     }
 
     // expression_statement -> expression ; | ; FIRSTS: ( ; ID NUM FOLLOWS: ( ; ID NUM additive else if return while { }
     public void expression_statement() {
         print_rule("expression_statement");
-        if ( nextLexeme().equals(";") ) {
+        if ( nextLexeme().equals(";") )
             removeToken();
-        }
         if ( nextLexeme().equals("(") || nextCategory().equals("ID") || nextCategory().equals("NUM") ) {
             expression();
             if (nextLexeme().equals(";")) {
@@ -285,14 +259,30 @@ public class Parser {
     public void compound_statement() {
         print_rule("compound_statement");
         if ( nextLexeme().equals("{") ) {
-            variable.createNewScope();
-            function.createNewScope();
+            int functionScopeSize = function.getFunctionScopeSize();
+            int variableScopeSize = variable.getVariableScopeSize();
+            System.out.println("Function scope size before: " + functionScopeSize);
+            System.out.println("Variable scope size before: " + variableScopeSize);
+            if ( functionScopeSize == 1 && variableScopeSize == 1 ) {
+                variable.createNewScope();
+            } else if ( functionScopeSize == 0 )
+                function.createNewScope();
             removeToken();
             local_declarations();
             statement_list();
+            functionScopeSize = function.getFunctionScopeSize();
+            variableScopeSize = variable.getVariableScopeSize();
             if ( nextLexeme().equals("}") ) {
-                variable.removeScope();
-                function.removeScope();
+                if ( variableScopeSize > 1 ) {
+                    variable.removeScope();
+                    variableScopeSize = variable.getVariableScopeSize();
+                    System.out.println("Variable scope size after deleting: " + variableScopeSize);
+                }
+                if ( functionScopeSize == 1 ) {
+                    function.removeScope();
+                    functionScopeSize = function.getFunctionScopeSize();
+                    System.out.println("Function scope size after deleting: " + functionScopeSize);
+                }
                 removeToken();
             } else reject();
         }
@@ -372,9 +362,6 @@ public class Parser {
     public void expression() {
         print_rule("expression");
         if ( nextCategory().equals("NUM") ) {
-            function.setFunctionIdentifier(nextLexeme());
-            function.put(function.getFunctionIdentifier(),function.getFunctionType());
-            function.setFunctionIdentifier(null); function.setFunctionType(null);
             removeToken();
             term_prime();
             additive_expression_prime();
