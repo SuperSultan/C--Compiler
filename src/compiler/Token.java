@@ -1,9 +1,12 @@
 package compiler;
 
+import java.util.ArrayDeque;
+
 class Token {
 
     private String lexeme;
     private String category;
+    private ArrayDeque<Token> tokens;
 
     Token (String lexeme, String category) {
         this.lexeme = lexeme;
@@ -13,5 +16,7 @@ class Token {
     public String getCategory() { return this.category; }
 
     public String getLexeme() { return this.lexeme; }
+
+    public void removeToken() { tokens.removeFirst(); }
 
 } // class Token
