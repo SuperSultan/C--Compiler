@@ -5,19 +5,8 @@ public class Parser {
 
     private boolean isAccept;
     private ArrayDeque<Token> tokens;
-<<<<<<< HEAD
-    private ArrayDeque<Node> nodes;
-    private VariableScope varScope;
-    private FunctionScope funScope;
-
-    //private static String varIdentifier;
-    //private static String funIdentifier;
-    //private static String varType;
-    //private static String funType;
-=======
     private Variable variable;
     private Function function;
->>>>>>> e54211d65b04ef6f94f9942cc1fa1206a3aeb99a
 
     public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
@@ -41,7 +30,7 @@ public class Parser {
     public void print_rule(String rulename) {
         if ( tokens.getFirst() != null ) {
             System.out.println(rulename + " " + nextLexeme());
-         }
+        }
     }
 
     public void reject() {
@@ -60,8 +49,8 @@ public class Parser {
     public void declaration_list() {
         print_rule("declaration_list");
         if (tokens.isEmpty()) return;
-            declaration();
-            declaration_list_prime();
+        declaration();
+        declaration_list_prime();
     }
 
     //declaration-list_prime -> declaration declaration-list_prime | empty FIRSTS: int void ϵ FOLLOWS: $
@@ -78,15 +67,8 @@ public class Parser {
     public void type_specifier() {
         print_rule("type_specifier");
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-<<<<<<< HEAD
-
-            funType = nextLexeme();
-            varType = nextLexeme();
-            type_specifier.addChildToken(nextToken());
-=======
             function.setFunctionType(nextLexeme());
             variable.setVariableType(nextLexeme());
->>>>>>> e54211d65b04ef6f94f9942cc1fa1206a3aeb99a
             removeToken();
         } else reject();
     }
@@ -97,16 +79,8 @@ public class Parser {
         if ( tokens.isEmpty() ) return;
         type_specifier();
         if ( nextCategory().equals("ID") ) {
-<<<<<<< HEAD
-            varScope.setIdentifier(nextLexeme());
-            funScope.setIdentifier(nextLexeme());
-            //funIdentifier = nextLexeme();
-            //varIdentifier = nextLexeme();
-            declaration.addChildToken(nextToken());
-=======
             function.setFunctionIdentifier(nextLexeme());
             variable.setVariableIdentifier(nextLexeme());
->>>>>>> e54211d65b04ef6f94f9942cc1fa1206a3aeb99a
             removeToken();
         }
         declaration_prime();
@@ -117,13 +91,6 @@ public class Parser {
         print_rule("declaration_prime");
         if (tokens.isEmpty()) return;
         if (nextLexeme().equals("(")) {
-<<<<<<< HEAD
-            String funIdentifier = funScope.
-            funScope.put(funIdentifier, funType);
-            funIdentifier = null; funType = null;
-            declaration_prime.addChildNode("fun_declaration");
-=======
->>>>>>> e54211d65b04ef6f94f9942cc1fa1206a3aeb99a
             fun_declaration();
         } else {
             var_declaration_prime();
