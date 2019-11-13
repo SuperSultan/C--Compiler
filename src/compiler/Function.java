@@ -1,34 +1,49 @@
 package compiler;
 
-import java.util.LinkedList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class Function {
-    private String funIdentifier;
-    private String dataType;
-    private LinkedList<Map<String,String>> list;
-    private Map<String,String> table;
+    private String type;
+    private String id;
+    private String returnType;
+    private Map<String, LinkedList<String>> symbols;
+    private LinkedList<Map<String, LinkedList<String>>> list;
     private boolean seenMain;
+    private boolean isMainLast;
 
     Function() {
-        this.funIdentifier = null;
-        this.dataType = null;
-        this.list = new LinkedList<Map<String,String>>();
-        this.table = new HashMap<String, String>();
-        list.add(table);
+        this.type = null;
+        this.id = null;
+        this.returnType = null;
+        this.list = new LinkedList<Map<String,LinkedList<String>>>();
+        this.symbols = new HashMap<String,LinkedList<String>>();
+        list.add(symbols);
         seenMain = false;
+        isMainLast = false;
     }
 
-    public void setFunctionIdentifier(String id) {
-        this.funIdentifier = id;
+    public void setType(String dT) {
+        this.type = dT;
     }
-    public void setFunctionType(String dT) {
-        this.dataType = dT;
+    public void setId(String id) {
+        this.id = id;
     }
-    public String getFunctionType() { return this.dataType; }
-    public String getFunctionIdentifier() { return this.funIdentifier; }
-    public int getFunctionScopeSize() { return this.table.size(); }
+    public void setReturn(String rT) {
+        this.returnType = rT;
+    }
+    public String getType() {
+        return this.type;
+    }
+    public String getId() {
+        return this.id;
+    }
+    public String getReturn() {
+        return this.returnType;
+    }
+    public int getScopeSize() {
+        return this.symbols.size();
+    }
 
     public void reject() {
         System.out.println("REJECT");
@@ -38,16 +53,16 @@ public class Function {
     public void functionSymbolTableTest() {
         if ( list.size() == 0) System.out.println("Empty functionSymbolTable");
         for(int i=0; i<list.size(); i++) {
-            for(Map.Entry<String,String> entry : table.entrySet() ) {
-                String variable = entry.getKey();
-                String type = entry.getValue();
-                System.out.println("IDENTIFIER " + variable + " TYPE: " + type + " SCOPE_LEVEL: " + list.indexOf(table));
+            for(Map.Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
+                String type = entry.getKey();
+                List<String> values = entry.getValue();
+                System.out.println("FUNCTION TYPE " + type + " VALUES: " + values.toString() + " SCOPE_LEVEL: " + list.indexOf(symbols));
             }
         }
     }
 
     public void createNewScope() {
-        Map<String,String> new_scope = new HashMap<>();
+        Map<String,LinkedList<String>> new_scope = new HashMap<>();
         list.add(new_scope);
         System.out.println("Created new function scope. Current function scope size: " + this.list.size());
     }
@@ -61,50 +76,71 @@ public class Function {
         this.functionSymbolTableTest();
     }
 
-    public void verifyFunctions() {
-
-        if ( !(funIdentifier.equals("main") && dataType.equals("void"))) {
-            System.out.println("Error: void main(void) { .. } is not the last function!");
-            reject();
+    public void checkReturnTypes() {
+        for(Map.Entry<String,LinkedList<String>> function : symbols.entrySet() ) {
+            String key = function.getKey();
+            String id = function.getValue().getFirst();
+            String rT = function.getValue().getLast();
+            if ( key.equals("int") && rT.equals("void") ) {
+                System.out.println("Error: int function " + id + "  cannot return void!"); //TODO set rT as void at var-dec prime
+                reject();
+            }
+            if ( key.equals("void") && !rT.equals("void") ) {
+                System.out.println("Error: void function " + id + " cannot return a value!");
+            }
         }
 
+    }
+
+    public void checkForMain() {
+        for(Entry<String, LinkedList<String>> entry : symbols.entrySet() ) {
+            String theKey = entry.getKey();
+            LinkedList<String> values = entry.getValue();
+            String id = values.getFirst();
+            String rT = values.getLast();
+            if ( theKey.equals("void") && id.equals("main") && rT.equals("void") ) { seenMain = true; }
+        }
         if ( !seenMain ) {
-            System.out.println("Error: THERE IS NO MAIN FUNCTION");
+            System.out.println("Error: Program missing void main(void)");
             reject();
         }
+    }
 
-        for(Map.Entry<String,String> entry : table.entrySet() ) {
-            if ( !this.table.containsKey("main") && !this.table.containsValue("void") ) {
-                System.out.println("Error: program missing main function!");
-                reject();
-            }
-            if ( entry.getKey().equals("empty") && entry.getValue().equals("return") && table.containsValue("int") ) {
-                System.out.println("Error: int function returning no value");
-                reject();
-            }
-            if ( !entry.getKey().equals("empty") && entry.getValue().equals("return") && table.containsValue("void") ) {
-                System.out.println("Error: void function returns a value!");
-                reject();
-            }
-            if ( !table.containsValue("return") && table.containsValue("int") ) { //TODO this is causing issues when void return type and no return
-                System.out.println("Error: int function with no return!");
-                reject();
+    public void checkMainIsLast() {
+        if ( seenMain ) {
+            Map<String,LinkedList<String>> lastListItem = list.getLast();
+            for(Map.Entry<String,LinkedList<String>> lastEntry : lastListItem.entrySet() ) {
+                String key = lastEntry.getKey();
+                LinkedList<String> values = lastEntry.getValue();
+                String id = values.getFirst();
+                String rT = values.getLast();
+                if ( key.equals("void") && id.equals("main") && rT.equals("void") ) {
+                    isMainLast = true;
+                } else {
+                    System.out.println("Error: void main(void) is not the last function!");
+                    reject();
+                }
             }
         }
     }
 
-    public void put(String identifier, String keyword) {
-        if (table.containsKey(identifier)) {
-            System.out.println("Error: identifier " + identifier + " already defined!");
-            reject();
-        } else {
-            table.put(identifier, keyword);
-            if ( identifier.equals("main") && keyword.equals("void") ) seenMain = true;
-            System.out.println("Added " + identifier + " " + keyword + " to function symbol table");
-            System.out.println("Number of functions in current scope: " + this.table.size());
+    public void put(String key, String id, String rT) {
+        for(Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
+            if ( entry.getValue().contains(id) ) {
+                System.out.println("Error: " + id + " is already defined!");
+                reject();
+            } else {
+                LinkedList<String> functionData = new LinkedList<>();
+                functionData.add(id);
+                functionData.add(rT);
+                symbols.put(key,functionData);
+                System.out.println("Added " + key + " " + id + " " + rT + " to function symbol table!");
+                System.out.println("Functions in current scope: " + this.symbols.size());
+            }
         }
-        this.setFunctionIdentifier(null);
-        this.setFunctionType(null);
+        this.setType(null);
+        this.setId(null);
+        this.setReturn(null);
     }
 
 }

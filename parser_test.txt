@@ -1,21 +1,12 @@
-/* assumes your lexer is working properly */
 
-int i;
-
-void newsub(void) {}
 
 void main(void) {
-	int a;
-	int b[1];
+	int b[1]; // problem here
 	int c;
-	int d[1];
+	//int d[1]; // and here
 	a = yeetsub(4);
 	sub(4, 6);
 	intmainvoid(a = 4 + 4, b, c, d);
 	newsub();
 	return 0;
-}
-
-int hi (int a) {
-    return a;
 }

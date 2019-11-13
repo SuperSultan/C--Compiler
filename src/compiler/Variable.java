@@ -5,85 +5,116 @@ import java.util.Map;
 import java.util.LinkedList;
 
 public class Variable {
-    private String varIdentifier;
-    private String dataType;
-    private Map<String,String> table;
-    private LinkedList<Map<String,String>> list;
+
+    private String type;
+    private String id;
+    private String arr;
+    private Map<String,LinkedList<String>> symbols;
+    private LinkedList<Map<String,LinkedList<String>>> list;
 
     Variable() {
-        this.varIdentifier = null;
-        this.dataType = null;
-        table = new HashMap<>(); // global scope
+        this.type = null;
+        this.id = null;
+        this.arr = null;
+        symbols = new HashMap<>(); // global scope
         list = new LinkedList<>(); // global scope
-        list.add(table);
+        list.add(symbols);
     }
 
-    public void setVariableIdentifier(String id) { this.varIdentifier = id; }
-    public void setVariableType(String dT) { this.dataType = dT; }
-    public String getVariableIdentifier() { return this.varIdentifier; }
-    public String getVariableType() { return this.dataType; }
-    public int getVariableScopeSize() { return this.list.size(); }
+    public void setType(String rT) {
+        this.type = rT;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setIsArray(String arr) {
+        this.arr = arr;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public String getIsArray() {
+        return this.arr;
+    }
+
+    public int getScopeSize() {
+        return this.list.size();
+    }
 
     public void reject() {
         System.out.println("REJECT");
         System.exit(0);
     }
 
-    public void put(String identifier, String keyword) {
-        checkDuplicates(identifier, keyword);
-        if (keyword.equals("void") ) {
-            System.out.println("Error, identifiers cannot be void!");
+    public void put(String type, String id, String isArray) {
+        checkDuplicates(id);
+        if ( type.equals("void") ) {
+            System.out.println("Error: variables cannot be of type void!");
             reject();
         } else {
-            table.put(identifier,keyword);
-            System.out.println("Added " + identifier + " " + keyword + " to variable symbol table");
-            System.out.println("Number of variables in current scope: " + this.table.size());
+            LinkedList<String> values = new LinkedList<>();
+            values.addFirst(id);
+            values.addLast(isArray);
+            symbols.put(type, values);
+            System.out.println("Added " + type + " " + id + " to variable symbol table. Is array?: " + isArray);
+            System.out.println("Number of variables in current scope: " + symbols.size());
         }
-        this.varIdentifier = null;
-        this.dataType = null;
+        this.type = null;
+        this.id = null;
+        this.arr = null;
     }
 
     public void createNewScope() {
-        Map<String,String> new_scope = new HashMap<>();
+        Map<String,LinkedList<String>> new_scope = new HashMap<>();
         list.add(new_scope);
-        System.out.println("Created new variable scope. Current variable scope size: " + list.size());
+        System.out.println("Created new variable scope. Current variable scope size: " + this.list.size());
     }
 
-    public void removeScope() {
+    public void deleteScope() {
         if ( !list.isEmpty() ) {
             list.getFirst().clear();
             list.remove();
             System.out.println("Deleted variable scope. Current variable scope size: " + list.size());
-        } else if ( list.isEmpty() ) {
-            System.out.println("Error: removed scope despite being size 0");
+        } else {
+            System.out.println("AFNAN WHY YOU ARE TRYING TO DELETE VARIABLE SCOPE EVEN THOUGH IT'S SIZE 0?");
         }
         this.variableSymbolTableTest();
     }
 
-    public void verifyVariableScope() {
-        for(Map.Entry<String,String> entry : table.entrySet() ) {
-            if ( table.containsValue(null) ) {
-                System.out.println("Error: Referencing variable with null value (null pointer exception");
-                reject();
-            }
-        }
-    }
-
-    private void variableSymbolTableTest() {
+    public void variableSymbolTableTest() {
         if ( list.size() == 0 ) System.out.println("Empty variableSymbolTable");
-        for(int i=0; i<list.size(); i++) {
-            for(Map.Entry<String,String> entry : table.entrySet() ) {
-                String variable = entry.getKey();
-                String type = entry.getValue();
-                System.out.println("IDENTIFIER " + variable + " TYPE: " + type + " SCOPE_LEVEL: " + list.indexOf(table));
+            for(Map.Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
+                String key = entry.getKey();
+                String id = entry.getValue().getFirst();
+                String isArray = entry.getValue().getLast();
+                System.out.println("Type: " + key + " Id: " + id + " isArray? : " + isArray + "SCOPE LEVEL: " + this.list.size());
+            }
+    }
+
+    public void checkDuplicates(String id) {
+        for(Map.Entry<String,LinkedList<String>> entry: symbols.entrySet() ) {
+            //type = entry.getKey();
+            id = entry.getValue().getFirst();
+            //isArray = entry.getValue().getLast();
+            if ( entry.getKey().equals(id) ) {
+                System.out.println("Error: " + id + " was already defined");
             }
         }
     }
 
-    public void checkDuplicates(String identifier, String keyword) {
-        for(Map.Entry<String,String> entry: table.entrySet() ) {
-            if ( entry.getKey().equals(identifier) ) {
-                System.out.println("Error: " + identifier + " was already defined");
+    public void testForNullValues() {
+        for(Map.Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
+            if ( symbols.containsValue(null) ) {
+                System.out.println("ERROR: " + entry.getKey() + " " + entry.getValue() + " has null value(s)");
+                reject();
             }
         }
     }
