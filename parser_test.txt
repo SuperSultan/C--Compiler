@@ -1,12 +1,4 @@
 
-
 void main(void) {
-	int b[1]; // problem here
-	int c;
-	//int d[1]; // and here
-	a = yeetsub(4);
-	sub(4, 6);
-	intmainvoid(a = 4 + 4, b, c, d);
-	newsub();
-	return 0;
+	return;
 }

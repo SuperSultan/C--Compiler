@@ -89,6 +89,14 @@ public class Variable {
         this.variableSymbolTableTest();
     }
 
+    public boolean checkArrayIndexIsNumber(String str) {
+        if ( !str.matches("\\d+") ) {
+            System.out.println("Error: Array index " + str + " is not an integer!");
+            reject();
+        }
+        return true;
+    }
+
     public void variableSymbolTableTest() {
         if ( list.size() == 0 ) System.out.println("Empty variableSymbolTable");
             for(Map.Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {

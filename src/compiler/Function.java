@@ -126,18 +126,18 @@ public class Function {
 
     public void put(String key, String id, String rT) {
         for(Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
-            if ( entry.getValue().contains(id) ) {
+            if (entry.getValue().contains(id)) {
                 System.out.println("Error: " + id + " is already defined!");
                 reject();
-            } else {
-                LinkedList<String> functionData = new LinkedList<>();
-                functionData.add(id);
-                functionData.add(rT);
-                symbols.put(key,functionData);
-                System.out.println("Added " + key + " " + id + " " + rT + " to function symbol table!");
-                System.out.println("Functions in current scope: " + this.symbols.size());
             }
         }
+        LinkedList<String> functionData = new LinkedList<>();
+        functionData.add(id);
+        functionData.add(rT);
+        symbols.put(key,functionData);
+        System.out.println("Added " + key + " " + id + " " + rT + " to function symbol table!");
+        System.out.println("Functions in current scope: " + this.symbols.size());
+
         this.setType(null);
         this.setId(null);
         this.setReturn(null);
