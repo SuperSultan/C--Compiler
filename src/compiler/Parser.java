@@ -23,15 +23,15 @@ public class Parser {
 
     public boolean isAccepted() {
         program();
-        //function.verifyFunctions();
-        variable.testForNullValues();
-        function.functionSymbolTableTest();
-        variable.variableSymbolTableTest();
+        function.checkReturnTypes();
+        //variable.testForNullValues();
+        //function.functionSymbolTableTest();
+        //variable.variableSymbolTableTest();
         //TODO test parameters here!
 
-        function.checkReturnTypes();
-        function.checkForMain(); // check void main(void) exists
-        function.checkMainIsLast(); // check if main is last
+        //function.checkReturnTypes();
+        //function.checkForMain(); // check void main(void) exists
+        //function.checkMainIsLast(); // check if main is last
         return nextLexeme().equals("$") && isAccept;
     }
 
@@ -75,8 +75,10 @@ public class Parser {
     public void type_specifier() {
         print_rule("type_specifier");
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-            function.setType(nextLexeme());
-            variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
+            if ( function.getType() == null ) // very important
+                function.setType(nextLexeme());
+            if ( variable.getType() == null )
+                variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
             removeToken();
         } else reject();
     }
@@ -165,7 +167,7 @@ public class Parser {
             } else reject();
         }
         if ( nextLexeme().equals("void") ) {
-            variable.setType(nextLexeme()); //TODO THIS SHOULD NOT BE HERE! WE ARE MIXING UP VARIABLE AND PARAMETERS
+            variable.setType(nextLexeme());
             parameter.setType(nextLexeme()); // void
             removeToken();
             params_prime();
@@ -216,9 +218,11 @@ public class Parser {
             removeToken();
             if ( nextLexeme().equals("void") ) {
                 parameter.setType("void");
+                //variable.setType("void"); //TODO this is causing issues
                 removeToken();
             } else if ( nextLexeme().equals("int") ) {
                 parameter.setType("int");
+                //variable.setType("int");
                 removeToken();
             }
             if ( nextCategory().equals("ID") ) {
@@ -227,7 +231,7 @@ public class Parser {
                 parameter.put(parameter.getType(),parameter.getId(),parameter.getIsArray());
                 removeToken();
                 param_prime();
-                variable.put(variable.getType(),variable.getId(),variable.getIsArray());
+                //variable.put(variable.getType(),variable.getId(),variable.getIsArray()); //TODO causes nullpointer exception lol
                 param_list_prime();
             } else reject();
         }
@@ -244,7 +248,7 @@ public class Parser {
     }
 
 
-    // var-declaration -> type-specifier ID var-declaration_prime FIRSTS: int void FOLLOWS: int void
+    // var-declaration -> void ID var-declaration_prime | int ID var-declaration_prime FIRSTS: int void FOLLOWS: int void
     public void var_declaration() {
         print_rule("var_declaration");
         type_specifier();
@@ -385,6 +389,8 @@ public class Parser {
         }
         if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().equals("(") ) {
             // TODO something for Function goes here?
+            function.setReturn(nextLexeme());
+            function.put(function.getType(), function.getId(), function.getReturn());
             expression();
             if ( nextLexeme().equals(";") ) {
                 removeToken();
@@ -396,7 +402,7 @@ public class Parser {
     public void expression() {
         print_rule("expression");
         if ( nextCategory().equals("NUM") ) {
-            function.setReturn(nextLexeme());
+            //function.setReturn(nextLexeme());
             variable.setId(nextLexeme()); // TODO is this correct ?
             removeToken();
             term_prime();
@@ -404,7 +410,7 @@ public class Parser {
             simple_expression_prime();
         }
         if ( nextCategory().equals("ID") ) {
-            function.setId(nextLexeme());
+            //function.setId(nextLexeme());
             variable.setId(nextLexeme());
             removeToken();
             expression_prime();
