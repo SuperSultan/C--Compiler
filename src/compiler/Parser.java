@@ -24,20 +24,20 @@ public class Parser {
     public boolean isAccepted() {
         program();
         function.checkReturnTypes();
+        //parameter.
         //variable.testForNullValues();
         //function.functionSymbolTableTest();
         //variable.variableSymbolTableTest();
         //TODO test parameters here!
-
         //function.checkReturnTypes();
-        //function.checkForMain(); // check void main(void) exists
-        //function.checkMainIsLast(); // check if main is last
+        function.checkForMain(); // check void main(void) exists
+        function.checkMainIsLast(); // check if main is last
         return nextLexeme().equals("$") && isAccept;
     }
 
     public void print_rule(String rulename) {
         if ( tokens.getFirst() != null ) {
-            System.out.println(rulename + " " + nextLexeme());
+            //System.out.println(rulename + " " + nextLexeme());
         }
     }
 
@@ -75,10 +75,8 @@ public class Parser {
     public void type_specifier() {
         print_rule("type_specifier");
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-            if ( function.getType() == null ) // very important
-                function.setType(nextLexeme());
-            if ( variable.getType() == null )
-                variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
+            function.setType(nextLexeme());
+            variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
             removeToken();
         } else reject();
     }
@@ -116,11 +114,9 @@ public class Parser {
             variable.setIsArray("var");
             parameter.setIsArray("var");
         }
-        if ( ! nextLexeme().equals(";") ) { // if the next token is not ; it is [ so we have an array
+        if ( nextLexeme().equals("[") ) {
             variable.setIsArray("arr");
             parameter.setIsArray("arr");
-        }
-        if ( nextLexeme().equals("[") ) {
             removeToken();
             if ( nextCategory().equals("NUM") ) {
                 variable.checkArrayIndexIsNumber(nextLexeme());
@@ -140,7 +136,7 @@ public class Parser {
         print_rule("fun_declaration");
         if ( tokens.isEmpty() ) return;
         if ( nextLexeme().equals("(") ) {
-            variable.createNewScope(); // param scope same scope as function scope
+            variable.createNewScope(); // variable scope starts after ( rather than { because of parameters
             removeToken();
             params();
             if ( nextLexeme().equals(")") ) {
@@ -159,7 +155,6 @@ public class Parser {
             removeToken();
             if ( nextCategory().equals("ID") ) {
                 variable.setId(nextLexeme());
-                variable.put(variable.getType(), variable.getId(), variable.getIsArray());
                 parameter.setId(nextLexeme());
                 removeToken();
                 param_prime();
@@ -167,10 +162,31 @@ public class Parser {
             } else reject();
         }
         if ( nextLexeme().equals("void") ) {
-            variable.setType(nextLexeme());
             parameter.setType(nextLexeme()); // void
             removeToken();
             params_prime();
+        }
+    }
+
+    // param_prime -> [ ] | empty FIRSTS: [ empty FOLLOWS: , )
+    public void param_prime() {
+        print_rule("param_prime");
+        if (nextLexeme().equals(",") || nextLexeme().equals(")")) {
+            variable.setIsArray("var");
+            parameter.setIsArray("var");
+            variable.put(variable.getType(), variable.getId(), variable.getIsArray());
+            parameter.put(parameter.getType(), parameter.getId(), parameter.getIsArray());
+            return;
+        }
+        if (nextLexeme().equals("[")) {
+            removeToken();
+            if (nextLexeme().equals("]")) {
+                removeToken();
+                variable.setIsArray("arr");
+                parameter.setIsArray("arr");
+                variable.put(variable.getType(), variable.getId(), variable.getIsArray());
+                parameter.put(parameter.getType(), parameter.getId(), parameter.getIsArray());
+            } else reject();
         }
     }
 
@@ -186,52 +202,26 @@ public class Parser {
             parameter.setId(nextLexeme());
             removeToken();
             param_prime();
-            variable.put(variable.getType(),variable.getId(),variable.getIsArray());
-            parameter.put(parameter.getType(),parameter.getId(),parameter.getIsArray());
             param_list_prime();
         }
     }
 
-    // param_prime -> [ ] | empty FIRSTS: [ empty FOLLOWS: , )
-    public void param_prime() {
-        print_rule("param_prime");
-        if (nextLexeme().equals(",") || nextLexeme().equals(")")) return;
-        if (nextLexeme().equals("[")) {
-            variable.setIsArray("arr");
-            parameter.setIsArray("arr");
-            removeToken();
-            if (nextLexeme().equals("]")) {
-                removeToken();
-            } else reject();
-        }
-        if ( !nextLexeme().equals("[")) {
-            variable.setIsArray("var"); //TODO should this be here? Probably.
-            parameter.setIsArray("var");
-        }
-    }
-
-    //param-list_prime -> , void ID param_prime param_list_prime | , int ID param_prime param_list_prime | empty FIRSTS: , empty FOLLOWS: )
+    //param-list_prime -> , int ID param_prime param_list_prime | , void ID param_prime param_list_prime |empty FIRSTS: , empty FOLLOWS: )
     public void param_list_prime() {
         print_rule("param_list_prime");
         if ( nextLexeme().equals(")") ) return;
         if ( nextLexeme().equals(",") ) {
             removeToken();
-            if ( nextLexeme().equals("void") ) {
-                parameter.setType("void");
-                //variable.setType("void"); //TODO this is causing issues
-                removeToken();
-            } else if ( nextLexeme().equals("int") ) {
-                parameter.setType("int");
-                //variable.setType("int");
+            if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+                variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
+                parameter.setType(nextLexeme());
                 removeToken();
             }
             if ( nextCategory().equals("ID") ) {
                 variable.setId(nextLexeme());
                 parameter.setId(nextLexeme());
-                parameter.put(parameter.getType(),parameter.getId(),parameter.getIsArray());
                 removeToken();
                 param_prime();
-                //variable.put(variable.getType(),variable.getId(),variable.getIsArray()); //TODO causes nullpointer exception lol
                 param_list_prime();
             } else reject();
         }
@@ -248,16 +238,15 @@ public class Parser {
     }
 
 
-    // var-declaration -> void ID var-declaration_prime | int ID var-declaration_prime FIRSTS: int void FOLLOWS: int void
+    // var-declaration -> type-specifier ID var-declaration_prime FIRSTS: int void FOLLOWS: int void
     public void var_declaration() {
         print_rule("var_declaration");
         type_specifier();
         if ( nextCategory().equals("ID") ) {
             variable.setId(nextLexeme());
             removeToken();
+            var_declaration_prime();
         } else reject();
-        var_declaration_prime();
-        variable.put(variable.getType(), variable.getId(),variable.getIsArray()); //TODO problem here: isArr is NULL
     }
 
     // statement-list -> statement statement-list | empty FIRSTS NUM ID ( ; { if while return empty FOLLOWS: }
@@ -289,7 +278,7 @@ public class Parser {
             expression();
             if (nextLexeme().equals(";")) {
                 removeToken();
-            } else reject(); //TODO is this wrong
+            } else reject();
         }
     }
 
@@ -299,8 +288,8 @@ public class Parser {
         if ( nextLexeme().equals("{") ) {
             int functionScopeSize = function.getScopeSize();
             int variableScopeSize = variable.getScopeSize();
-            System.out.println("Function scope size before: " + functionScopeSize);
-            System.out.println("Variable scope size before: " + variableScopeSize);
+            //System.out.println("Function scope size before: " + functionScopeSize);
+            //System.out.println("Variable scope size before: " + variableScopeSize);
             if ( functionScopeSize == 0 ) {
                 function.createNewScope();
             } else if ( functionScopeSize == 1 && variableScopeSize == 1 ) {
@@ -315,12 +304,12 @@ public class Parser {
                 if ( variableScopeSize > 1 ) {
                     variable.deleteScope();
                     variableScopeSize = variable.getScopeSize();
-                    System.out.println("Variable scope size after deleting: " + variableScopeSize);
+                    //System.out.println("Variable scope size after deleting: " + variableScopeSize);
                 }
                 if ( functionScopeSize == 1 ) {
                     function.removeScope();
                     functionScopeSize = function.getScopeSize();
-                    System.out.println("Function scope size after deleting: " + functionScopeSize);
+                    //System.out.println("Function scope size after deleting: " + functionScopeSize);
                 }
                 removeToken();
             } else reject();
@@ -388,10 +377,8 @@ public class Parser {
             removeToken();
         }
         if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().equals("(") ) {
-            // TODO something for Function goes here?
-            function.setReturn(nextLexeme());
-            function.put(function.getType(), function.getId(), function.getReturn());
             expression();
+            function.put(function.getType(), function.getId(), function.getReturn());
             if ( nextLexeme().equals(";") ) {
                 removeToken();
             } else reject();
@@ -402,7 +389,7 @@ public class Parser {
     public void expression() {
         print_rule("expression");
         if ( nextCategory().equals("NUM") ) {
-            //function.setReturn(nextLexeme());
+            function.setReturn(nextLexeme());
             variable.setId(nextLexeme()); // TODO is this correct ?
             removeToken();
             term_prime();
@@ -410,7 +397,7 @@ public class Parser {
             simple_expression_prime();
         }
         if ( nextCategory().equals("ID") ) {
-            //function.setId(nextLexeme());
+            function.setId(nextLexeme());
             variable.setId(nextLexeme());
             removeToken();
             expression_prime();
@@ -423,7 +410,7 @@ public class Parser {
                 term_prime();
                 additive_expression_prime();
                 simple_expression_prime();
-            } else reject(); //TODO is this wrong?
+            } else reject();
         }
     }
 
@@ -449,7 +436,7 @@ public class Parser {
         }
         if ( nextLexeme().equals("(") ) {
             removeToken();
-            args();                                 //TODO make sure we implement stuff in this function
+            args();                                 //TODO make sure we implement function calls in args
             if ( nextLexeme().equals(")") ) {
                 removeToken();
                 term_prime();
@@ -556,7 +543,7 @@ public class Parser {
         }
         if ( nextLexeme().equals("(") ) {
             removeToken();
-            args();                                  //TODO should we be adding stuff here?
+            args();                                  //TODO we need to add arg class attributes here
             if ( nextLexeme().equals(")") ) {
                 removeToken();
             } else reject();

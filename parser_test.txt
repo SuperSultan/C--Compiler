@@ -1,3 +1,10 @@
-int sub(int a, int b) {
-	int c;
+void hi(void) {
+    int c;
+    {
+        int c;
+    }
+}
+
+void sub(int a,int b) {
+    return;
 }

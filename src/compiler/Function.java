@@ -53,12 +53,12 @@ public class Function {
     }
 
     public void functionSymbolTableTest() {
-        if ( list.size() == 0) System.out.println("Empty functionSymbolTable");
+        //if ( list.size() == 0) System.out.println("Empty functionSymbolTable");
         for(int i=0; i<list.size(); i++) {
             for(Map.Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
                 String type = entry.getKey();
                 List<String> values = entry.getValue();
-                System.out.println("FUNCTION TYPE " + type + " VALUES: " + values.toString() + " SCOPE_LEVEL: " + list.indexOf(symbols));
+         //       System.out.println("FUNCTION TYPE " + type + " VALUES: " + values.toString() + " SCOPE_LEVEL: " + list.indexOf(symbols));
             }
         }
     }
@@ -67,7 +67,7 @@ public class Function {
         Map<String,LinkedList<String>> new_scope = new HashMap<>();
         list.add(new_scope);
         ++scopeSize;
-        System.out.println("Created new function scope. Current function scope size: " + this.scopeSize);
+       // System.out.println("Created new function scope. Current function scope size: " + this.scopeSize);
     }
 
     public void removeScope() {
@@ -76,7 +76,7 @@ public class Function {
             //list.getFirst().clear();
             //list.remove();
             --scopeSize;
-            System.out.println("Deleted function scope Current function scope size: " + this.scopeSize);
+         //   System.out.println("Deleted function scope Current function scope size: " + this.scopeSize);
         }
         this.functionSymbolTableTest();
     }
@@ -90,7 +90,7 @@ public class Function {
             if ( theKey.equals("void") && id.equals("main") && rT.equals("void") ) { seenMain = true; }
         }
         if ( !seenMain ) {
-            System.out.println("Error: Program missing void main(void)");
+          //  System.out.println("Error: Program missing void main(void)");
             reject();
         }
     }
@@ -106,7 +106,7 @@ public class Function {
                 if ( key.equals("void") && id.equals("main") && rT.equals("void") ) {
                     isMainLast = true;
                 } else {
-                    System.out.println("Error: void main(void) is not the last function!");
+                 //   System.out.println("Error: void main(void) is not the last function!");
                     reject();
                 }
             }
@@ -116,20 +116,20 @@ public class Function {
     public void put(String key, String id, String rT) {
         for(Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
             if (entry.getValue().contains(id)) {
-                System.out.println("Error: " + id + " is already defined!");
+           //     System.out.println("Error: " + id + " is already defined!");
                 reject();
             }
         }
         if ( key.equals("int") && rT == null) {
-            System.out.println("Error: int function" + id + " needs a return value!");
+         //   System.out.println("Error: int function" + id + " needs a return value!");
         }
         LinkedList<String> functionData = new LinkedList<>();
         functionData.add(id);
         functionData.add(rT);
         symbols.put(key,functionData);
         checkReturnTypes();
-        System.out.println("Added " + key + " " + id + " " + rT + " to function symbol table!");
-        System.out.println("Functions in current scope: " + this.symbols.size());
+       // System.out.println("Added " + key + " " + id + " " + rT + " to function symbol table!");
+       // System.out.println("Functions in current scope: " + this.symbols.size());
 
         this.setType(null);
         this.setId(null);
@@ -144,18 +144,18 @@ public class Function {
                 String id = function.getValue().getFirst();
                 String rT = function.getValue().getLast();
                 if (key.equals("int") && rT.equals("void")) {
-                    System.out.println("Error: int function " + id + "  cannot return void!");
+                   // System.out.println("Error: int function " + id + "  cannot return void!");
                     reject();
                 }
                 if (key.equals("int") && ! rT.matches("^[a-zA-Z0-9]*$") ) { // checks returnType is alphanumeric
-                    System.out.println("Error: int function " + id + " should return a value!");
+                   // System.out.println("Error: int function " + id + " should return a value!");
                     reject();//TODO check this is correct!
                 }
                 if (key.equals("int") &&  ( function.getValue().getLast() == null) ) {
-                    System.out.println("Error: int function " + id + " cannot return void!");
+                    //System.out.println("Error: int function " + id + " cannot return void!");
                 }
                 if (key.equals("void") && !rT.equals("void")) {
-                    System.out.println("Error: void function " + id + " cannot return a value!");
+                  //  System.out.println("Error: void function " + id + " cannot return a value!");
                     reject();
                 }
             }
