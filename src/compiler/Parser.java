@@ -5,16 +5,18 @@ public class Parser {
 
     private boolean isAccept;
     private ArrayDeque<Token> tokens;
-    private Variable variable;
-    private Function function;
-    private Parameter parameter;
+    private Variables variable;
+    private Functions function;
+    private Parameters parameter;
+    private Arguments arguments;
 
     public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
         this.tokens = theTokens;
-        function = new Function();
-        variable = new Variable();
-        parameter = new Parameter();
+        variable = new Variables();
+        function = new Functions(variable);
+        parameter = new Parameters();
+        arguments = new Arguments();
     }
 
     public String nextLexeme() { return tokens.getFirst().getLexeme(); }
@@ -29,15 +31,14 @@ public class Parser {
         //function.functionSymbolTableTest();
         //variable.variableSymbolTableTest();
         //TODO test parameters here!
-        //function.checkReturnTypes();
-        function.checkForMain(); // check void main(void) exists
-        function.checkMainIsLast(); // check if main is last
+        function.checkForMain();
+        function.checkMainIsLast(); // TODO broken
         return nextLexeme().equals("$") && isAccept;
     }
 
     public void print_rule(String rulename) {
         if ( tokens.getFirst() != null ) {
-            //System.out.println(rulename + " " + nextLexeme());
+            System.out.println(rulename + " " + nextLexeme());
         }
     }
 
@@ -75,7 +76,9 @@ public class Parser {
     public void type_specifier() {
         print_rule("type_specifier");
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-            function.setType(nextLexeme());
+            //if ( function.getType().equals(null) ) { //
+                function.setType(nextLexeme()); // TODO check if the function type is either !void or null before executing
+            //}
             variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
             removeToken();
         } else reject();
@@ -288,8 +291,8 @@ public class Parser {
         if ( nextLexeme().equals("{") ) {
             int functionScopeSize = function.getScopeSize();
             int variableScopeSize = variable.getScopeSize();
-            //System.out.println("Function scope size before: " + functionScopeSize);
-            //System.out.println("Variable scope size before: " + variableScopeSize);
+            System.out.println("Function scope size before: " + functionScopeSize);
+            System.out.println("Variable scope size before: " + variableScopeSize);
             if ( functionScopeSize == 0 ) {
                 function.createNewScope();
             } else if ( functionScopeSize == 1 && variableScopeSize == 1 ) {
@@ -304,12 +307,12 @@ public class Parser {
                 if ( variableScopeSize > 1 ) {
                     variable.deleteScope();
                     variableScopeSize = variable.getScopeSize();
-                    //System.out.println("Variable scope size after deleting: " + variableScopeSize);
+                    System.out.println("Variable scope size after deleting: " + variableScopeSize);
                 }
                 if ( functionScopeSize == 1 ) {
                     function.removeScope();
                     functionScopeSize = function.getScopeSize();
-                    //System.out.println("Function scope size after deleting: " + functionScopeSize);
+                    System.out.println("Function scope size after deleting: " + functionScopeSize);
                 }
                 removeToken();
             } else reject();
@@ -397,7 +400,7 @@ public class Parser {
             simple_expression_prime();
         }
         if ( nextCategory().equals("ID") ) {
-            function.setId(nextLexeme());
+            function.setReturn(nextLexeme());
             variable.setId(nextLexeme());
             removeToken();
             expression_prime();

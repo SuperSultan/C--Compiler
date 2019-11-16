@@ -3,7 +3,7 @@ package compiler;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class Function {
+public class Functions {
     private String type;
     private String id;
     private String returnType;
@@ -12,8 +12,13 @@ public class Function {
     private int scopeSize;
     private boolean seenMain;
     private boolean isMainLast;
+    private Variables variables;
 
-    Function() {
+    private LinkedList<Map<String,LinkedList<String>>> variableList;
+    //private Map<String,LinkedList<String>> variableSymbols;
+
+    Functions(Variables variables) {
+        this.variables = new Variables();
         this.type = null;
         this.id = null;
         this.returnType = null;
@@ -53,13 +58,11 @@ public class Function {
     }
 
     public void functionSymbolTableTest() {
-        //if ( list.size() == 0) System.out.println("Empty functionSymbolTable");
-        for(int i=0; i<list.size(); i++) {
-            for(Map.Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
-                String type = entry.getKey();
-                List<String> values = entry.getValue();
-         //       System.out.println("FUNCTION TYPE " + type + " VALUES: " + values.toString() + " SCOPE_LEVEL: " + list.indexOf(symbols));
-            }
+        if ( list.size() == 0) System.out.println("Empty functionSymbolTable");
+        for(Map.Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
+            String type = entry.getKey();
+            List<String> values = entry.getValue();
+            System.out.println("FUNCTION TYPE " + type + " VALUES: " + values.toString());
         }
     }
 
@@ -67,16 +70,13 @@ public class Function {
         Map<String,LinkedList<String>> new_scope = new HashMap<>();
         list.add(new_scope);
         ++scopeSize;
-       // System.out.println("Created new function scope. Current function scope size: " + this.scopeSize);
+        System.out.println("Created new function scope. Current function scope size: " + this.scopeSize);
     }
 
     public void removeScope() {
         if ( !list.isEmpty() ) {
-            //checkReturnTypes();
-            //list.getFirst().clear();
-            //list.remove();
             --scopeSize;
-         //   System.out.println("Deleted function scope Current function scope size: " + this.scopeSize);
+            System.out.println("Deleted function scope Current function scope size: " + this.scopeSize);
         }
         this.functionSymbolTableTest();
     }
@@ -87,10 +87,10 @@ public class Function {
             LinkedList<String> values = entry.getValue();
             String id = values.getFirst();
             String rT = values.getLast();
-            if ( theKey.equals("void") && id.equals("main") && rT.equals("void") ) { seenMain = true; }
+            if ( this.type.equals("void") && this.id.equals("main") ) { seenMain = true; }
         }
         if ( !seenMain ) {
-          //  System.out.println("Error: Program missing void main(void)");
+            System.out.println("Error: Program missing void main(void)");
             reject();
         }
     }
@@ -106,58 +106,65 @@ public class Function {
                 if ( key.equals("void") && id.equals("main") && rT.equals("void") ) {
                     isMainLast = true;
                 } else {
-                 //   System.out.println("Error: void main(void) is not the last function!");
+                    System.out.println("Error: void main(void) is not the last function!");
                     reject();
                 }
             }
-        }
+        } // else reject
     }
 
     public void put(String key, String id, String rT) {
         for(Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
             if (entry.getValue().contains(id)) {
-           //     System.out.println("Error: " + id + " is already defined!");
+                System.out.println("Error: " + id + " is already defined!");
                 reject();
             }
-        }
-        if ( key.equals("int") && rT == null) {
-         //   System.out.println("Error: int function" + id + " needs a return value!");
         }
         LinkedList<String> functionData = new LinkedList<>();
         functionData.add(id);
         functionData.add(rT);
         symbols.put(key,functionData);
         checkReturnTypes();
-       // System.out.println("Added " + key + " " + id + " " + rT + " to function symbol table!");
-       // System.out.println("Functions in current scope: " + this.symbols.size());
+        System.out.println("Added " + key + " " + id + " " + rT + " to function symbol table!");
+        System.out.println("Functions in current scope: " + this.symbols.size());
 
         this.setType(null);
         this.setId(null);
         this.setReturn(null);
     }
 
-
     public void checkReturnTypes() {
-        for(int i=0; i<scopeSize; i++) {
-            for (Map.Entry<String, LinkedList<String>> function : symbols.entrySet()) {
-                String key = function.getKey();
-                String id = function.getValue().getFirst();
-                String rT = function.getValue().getLast();
-                if (key.equals("int") && rT.equals("void")) {
-                   // System.out.println("Error: int function " + id + "  cannot return void!");
-                    reject();
+
+        //TODO void hi a is being put into the symbol table erroneously
+
+        for (Map.Entry<String, LinkedList<String>> function : symbols.entrySet()) {
+            /*
+            Variables vars = variables.get();
+            LinkedList<Map<String,LinkedList<String>>> variableList = vars.getList();
+            Map<String,LinkedList<String>> variableSymbols = vars.getSymbols();
+
+            for(int i=0; i<variableList.size(); i++) {
+                for(Map.Entry<String,LinkedList<String>> variableTypesAndIds : variableSymbols.entrySet() ) {
+                    String key = variableTypesAndIds.getKey();
+                    LinkedList<String> values = variableTypesAndIds.getValue();
+                    String id = values.getFirst();
+                    if ( ! variableTypesAndIds.getValue().contains(id) ) {
+                        System.out.println("Error: " + id + " was never declared in the variable symbol table!");
+                    }
                 }
-                if (key.equals("int") && ! rT.matches("^[a-zA-Z0-9]*$") ) { // checks returnType is alphanumeric
-                   // System.out.println("Error: int function " + id + " should return a value!");
-                    reject();//TODO check this is correct!
-                }
-                if (key.equals("int") &&  ( function.getValue().getLast() == null) ) {
-                    //System.out.println("Error: int function " + id + " cannot return void!");
-                }
-                if (key.equals("void") && !rT.equals("void")) {
-                  //  System.out.println("Error: void function " + id + " cannot return a value!");
-                    reject();
-                }
+            }
+            */
+
+            if ( this.type.equals("int") &&  ( !this.returnType.matches("^[a-zA-Z0-9]*$") || this.returnType.equals("void") )) {
+                System.out.println("Error: int function " + id + " should return a value!"); // checks if rT is a string or if it is void
+                reject();
+            }
+            if (this.type.equals("int") &&  ( function.getValue().getLast() == null) ) {
+                System.out.println("Error: int function " + id + " cannot return void!");
+            }
+            if (this.type.equals("void") && !this.returnType.equals("void")) {
+                System.out.println("Error: void function " + id + " cannot return a value!");
+                reject();
             }
         }
     }

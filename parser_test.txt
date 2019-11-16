@@ -3,8 +3,13 @@ void hi(void) {
     {
         int c;
     }
+    return a;
 }
 
 void sub(int a,int b) {
     return;
+}
+
+void main(void) {
+
 }
