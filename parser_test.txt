@@ -1,8 +1,14 @@
-/* assumes your lexer is working properly */
+void hi(void) {
+    int c;
+    {
+        int c;
+    }
+    return a;
+}
 
-int i;
-
-void newsub(void) {}
+void sub(int a,int b) {
+    return;
+}
 
 void main(void) {
 	int a;
@@ -14,4 +20,5 @@ void main(void) {
 	intmainvoid(a = 4 + 4, b, c, d);
 	newsub();
 	return;
+
 }
