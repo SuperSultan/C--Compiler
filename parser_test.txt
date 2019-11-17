@@ -13,9 +13,5 @@ void main(void) {
 	sub(4, 6);
 	intmainvoid(a = 4 + 4, b, c, d);
 	newsub();
-	return 0;
-}
-
-int hi (int a) {
-    return a;
+	return;
 }

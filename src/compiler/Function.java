@@ -23,12 +23,13 @@ public class Function {
     public void setFunctionIdentifier(String id) {
         this.funIdentifier = id;
     }
-    public void setFunctionType(String dT) {
-        this.dataType = dT;
-    }
     public String getFunctionType() { return this.dataType; }
     public String getFunctionIdentifier() { return this.funIdentifier; }
     public int getFunctionScopeSize() { return this.table.size(); }
+
+    public void setFunctionType(String lexeme) {
+        this.dataType = lexeme;
+    }
 
     public void reject() {
         System.out.println("REJECT");
@@ -63,7 +64,7 @@ public class Function {
 
     public void verifyFunctions() {
 
-        if ( !(funIdentifier.equals("main") && dataType.equals("void"))) {
+        if ( ! funIdentifier.equals("main") ) {
             System.out.println("Error: void main(void) { .. } is not the last function!");
             reject();
         }
