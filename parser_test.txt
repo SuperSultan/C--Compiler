@@ -3,7 +3,7 @@ void hi(void) {
     {
         int c;
     }
-    return a;
+    return;
 }
 
 void sub(int a,int b) {
@@ -20,5 +20,5 @@ void main(void) {
 	intmainvoid(a = 4 + 4, b, c, d);
 	newsub();
 	return;
-
 }
+

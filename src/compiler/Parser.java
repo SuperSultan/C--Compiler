@@ -25,14 +25,9 @@ public class Parser {
 
     public boolean isAccepted() {
         program();
-        function.checkReturnTypes();
-        //parameter.
-        //variable.testForNullValues();
-        //function.functionSymbolTableTest();
-        //variable.variableSymbolTableTest();
         //TODO test parameters here!
         function.checkForMain();
-        function.checkMainIsLast(); // TODO broken
+        ///function.checkMainIsLast(); // TODO broken
         return nextLexeme().equals("$") && isAccept;
     }
 
@@ -76,9 +71,8 @@ public class Parser {
     public void type_specifier() {
         print_rule("type_specifier");
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-            //if ( function.getType().equals(null) ) { //
+            if ( function.getType() == null || !function.getType().equals("void") )
                 function.setType(nextLexeme()); // TODO check if the function type is either !void or null before executing
-            //}
             variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
             removeToken();
         } else reject();
