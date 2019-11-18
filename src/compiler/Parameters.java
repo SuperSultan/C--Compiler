@@ -11,6 +11,7 @@ public class Parameters {
     private String arr;
     private Map<String,LinkedList<String>> symbols;
     private LinkedList<Map<String,LinkedList<String>>> list;
+    private int numberOfParameters;
 
     Parameters() {
         this.type = null;
@@ -19,6 +20,7 @@ public class Parameters {
         symbols = new HashMap<>();
         list = new LinkedList<>();
         list.add(symbols);
+        this.numberOfParameters = 0;
     }
 
     public void setType(String type) { this.type = type; }
@@ -27,6 +29,7 @@ public class Parameters {
     public String getType() { return this.type; }
     public String getId() { return this.id; }
     public String getIsArray() { return this.arr; }
+    public int getNumberOfParameters() { return this.numberOfParameters; }
 
     public void reject() {
         System.out.println("REJECT");
@@ -49,6 +52,7 @@ public class Parameters {
         values.addFirst(id);
         values.addLast(arr);
         symbols.put(type,values);
+        ++numberOfParameters;
         System.out.println("Added " + type + " " + id + " " + " to parameter symbol table. isArray? " + arr);
         System.out.println("Number of parameters in parameter symbol table: " + symbols.size() );
         this.type = null;

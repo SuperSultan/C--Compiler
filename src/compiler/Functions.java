@@ -15,6 +15,8 @@ public class Functions {
     private LinkedList<Map<String,LinkedList<String>>> variableList;
     //private Map<String,LinkedList<String>> variableSymbols;
 
+    //TODO check that only simple structures are returned!
+
     Functions(Variables variables) {
         this.variables = new Variables();
         this.type = null;

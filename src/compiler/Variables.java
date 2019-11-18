@@ -24,39 +24,30 @@ public class Variables {
     public void setType(String rT) {
         this.type = rT;
     }
-
     public void setId(String id) {
         this.id = id;
     }
-
     public void setIsArray(String arr) {
         this.arr = arr;
     }
-
     public String getType() {
         return this.type;
     }
-
     public String getId() {
         return this.id;
     }
-
     public String getIsArray() {
         return this.arr;
     }
-
     public int getScopeSize() {
         return this.list.size();
     }
-
     public LinkedList<Map<String,LinkedList<String>>> getList() {
         return this.list;
     }
-
     public Map<String,LinkedList<String>> getSymbols() {
         return this.symbols;
     }
-
     public Variables get() {
         return this;
     }
@@ -104,9 +95,9 @@ public class Variables {
         this.variableSymbolTableTest();
     }
 
-    public boolean checkArrayIndexIsNumber(String str) {
-        if ( !str.matches("\\d+") ) {
-            System.out.println("Error: Array index " + str + " is not an integer!");
+    public boolean checkArrayIndexIsNumber(String lexeme) {
+        if ( !lexeme.matches("\\d+") ) {
+            System.out.println("Error: Array index should be an integer, not '" + lexeme + "'");
             reject();
         }
         return true;
@@ -120,15 +111,6 @@ public class Variables {
                 String isArray = entry.getValue().getLast();
                 //System.out.println("Type: " + key + " Id: " + id + " isArray? : " + isArray + "SCOPE LEVEL: " + this.list.size());
             }
-    }
-
-    public void testForNullValues() {
-        for(Map.Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
-            if ( symbols.containsValue(null) ) {
-                System.out.println("ERROR: " + entry.getKey() + " " + entry.getValue() + " has null value(s)");
-                reject();
-            }
-        }
     }
 
 }
