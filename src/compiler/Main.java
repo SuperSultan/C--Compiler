@@ -23,9 +23,6 @@ public class Main {
         Parser parser = new Parser(tokens);
         System.out.println(parser.isAccepted() ? "ACCEPT" : "REJECT");
 
-        //LinkedList<Map<String,String>> symbol_table = new LinkedList<>();
-        //symbol_table = parser.getSymbolTable();
-
         //SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(nodes);
         //System.out.println(semanticAnalyzer.isAccepted() ? "ACCEPT" : "REJECT");
     }

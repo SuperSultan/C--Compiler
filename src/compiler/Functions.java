@@ -10,12 +10,12 @@ public class Functions {
     private Map<String, LinkedList<String>> symbols;
     private LinkedList<Map<String, LinkedList<String>>> list;
     private int scopeSize;
-    private boolean seenMain;
-    private boolean isMainLast;
     private Variables variables;
 
     private LinkedList<Map<String,LinkedList<String>>> variableList;
     //private Map<String,LinkedList<String>> variableSymbols;
+
+    //TODO check that only simple structures are returned!
 
     Functions(Variables variables) {
         this.variables = new Variables();
@@ -26,8 +26,6 @@ public class Functions {
         this.symbols = new HashMap<String,LinkedList<String>>();
         this.scopeSize = 0;
         list.add(symbols);
-        seenMain = false;
-        isMainLast = false;
     }
 
     public void setType(String dT) {
@@ -81,36 +79,17 @@ public class Functions {
         this.functionSymbolTableTest();
     }
 
-    public void checkForMain() {
+    public void checkForMain() { // checks that the last function is main (functions are deleted from symbol table upon seeing a "}"
         for(Entry<String, LinkedList<String>> entry : symbols.entrySet() ) {
-            String theKey = entry.getKey();
-            LinkedList<String> values = entry.getValue();
-            String id = values.getFirst();
-            String rT = values.getLast();
-            if ( this.type.equals("void") && this.id.equals("main") ) { seenMain = true; }
-        }
-        if ( !seenMain ) {
-            System.out.println("Error: Program missing void main(void)");
-            reject();
-        }
-    }
-
-    public void checkMainIsLast() {
-        if ( seenMain ) {
-            Map<String,LinkedList<String>> lastListItem = list.getLast();
-            for(Map.Entry<String,LinkedList<String>> lastEntry : lastListItem.entrySet() ) {
-                String key = lastEntry.getKey();
-                LinkedList<String> values = lastEntry.getValue();
+            if (symbols.containsKey("void")) {
+                LinkedList<String> values = entry.getValue();
                 String id = values.getFirst();
-                String rT = values.getLast();
-                if ( key.equals("void") && id.equals("main") && rT.equals("void") ) {
-                    isMainLast = true;
-                } else {
-                    System.out.println("Error: void main(void) is not the last function!");
+                if ( ! id.equals("main")) {
+                    System.out.println("Error: void main(void) should be the last declared function!");
                     reject();
                 }
             }
-        } // else reject
+        }
     }
 
     public void put(String key, String id, String rT) {
@@ -127,7 +106,6 @@ public class Functions {
         checkReturnTypes();
         System.out.println("Added " + key + " " + id + " " + rT + " to function symbol table!");
         System.out.println("Functions in current scope: " + this.symbols.size());
-
         this.setType(null);
         this.setId(null);
         this.setReturn(null);
@@ -135,25 +113,7 @@ public class Functions {
 
     public void checkReturnTypes() {
 
-        //TODO void hi a is being put into the symbol table erroneously
-
         for (Map.Entry<String, LinkedList<String>> function : symbols.entrySet()) {
-            /*
-            Variables vars = variables.get();
-            LinkedList<Map<String,LinkedList<String>>> variableList = vars.getList();
-            Map<String,LinkedList<String>> variableSymbols = vars.getSymbols();
-
-            for(int i=0; i<variableList.size(); i++) {
-                for(Map.Entry<String,LinkedList<String>> variableTypesAndIds : variableSymbols.entrySet() ) {
-                    String key = variableTypesAndIds.getKey();
-                    LinkedList<String> values = variableTypesAndIds.getValue();
-                    String id = values.getFirst();
-                    if ( ! variableTypesAndIds.getValue().contains(id) ) {
-                        System.out.println("Error: " + id + " was never declared in the variable symbol table!");
-                    }
-                }
-            }
-            */
 
             if ( this.type.equals("int") &&  ( !this.returnType.matches("^[a-zA-Z0-9]*$") || this.returnType.equals("void") )) {
                 System.out.println("Error: int function " + id + " should return a value!"); // checks if rT is a string or if it is void

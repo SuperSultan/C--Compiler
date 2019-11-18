@@ -8,7 +8,7 @@ public class Parser {
     private Variables variable;
     private Functions function;
     private Parameters parameter;
-    private Arguments arguments;
+    private FunctionCallArguments functionCallArguments;
 
     public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
@@ -16,7 +16,7 @@ public class Parser {
         variable = new Variables();
         function = new Functions(variable);
         parameter = new Parameters();
-        arguments = new Arguments();
+        functionCallArguments = new FunctionCallArguments(function, parameter);
     }
 
     public String nextLexeme() { return tokens.getFirst().getLexeme(); }
@@ -25,14 +25,8 @@ public class Parser {
 
     public boolean isAccepted() {
         program();
-        function.checkReturnTypes();
-        //parameter.
-        //variable.testForNullValues();
-        //function.functionSymbolTableTest();
-        //variable.variableSymbolTableTest();
         //TODO test parameters here!
         function.checkForMain();
-        function.checkMainIsLast(); // TODO broken
         return nextLexeme().equals("$") && isAccept;
     }
 
@@ -76,9 +70,8 @@ public class Parser {
     public void type_specifier() {
         print_rule("type_specifier");
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-            //if ( function.getType().equals(null) ) { //
+            if ( function.getType() == null || !function.getType().equals("void") )
                 function.setType(nextLexeme()); // TODO check if the function type is either !void or null before executing
-            //}
             variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
             removeToken();
         } else reject();
@@ -121,8 +114,8 @@ public class Parser {
             variable.setIsArray("arr");
             parameter.setIsArray("arr");
             removeToken();
+            variable.checkArrayIndexIsNumber(nextLexeme());
             if ( nextCategory().equals("NUM") ) {
-                variable.checkArrayIndexIsNumber(nextLexeme());
                 removeToken();
                 if ( nextLexeme().equals("]") ) {
                     removeToken();
@@ -393,7 +386,7 @@ public class Parser {
         print_rule("expression");
         if ( nextCategory().equals("NUM") ) {
             function.setReturn(nextLexeme());
-            variable.setId(nextLexeme()); // TODO is this correct ?
+            variable.setId(nextLexeme());
             removeToken();
             term_prime();
             additive_expression_prime();
@@ -546,7 +539,7 @@ public class Parser {
         }
         if ( nextLexeme().equals("(") ) {
             removeToken();
-            args();                                  //TODO we need to add arg class attributes here
+            args();
             if ( nextLexeme().equals(")") ) {
                 removeToken();
             } else reject();
@@ -556,8 +549,16 @@ public class Parser {
     // args -> arg-list | empty FIRSTS: NUM ID ( FOLLOWS: )
     public void args() {
         print_rule("args");
-        if ( nextLexeme().equals(")") ) return;
-        if ( nextCategory().equals("ID") || nextCategory().equals("NUM") || nextLexeme().equals("(") ) {
+        if ( nextLexeme().equals(")") ) {
+            functionCallArguments.setNumberOfArguments(0);
+            functionCallArguments.checkNumArgumentsEqualsNumParameters(); //TODO check these two, too.
+            return;
+        }
+        if ( nextCategory().equals("ID") || nextCategory().equals("NUM") ) {
+            arg_list();
+            functionCallArguments.checkType(nextLexeme()); // TODO test this: validate type of current argument against type of current parameter
+        }
+        if ( nextLexeme().equals("(") ) { // created to segregate checkType()
             arg_list();
         }
     }
