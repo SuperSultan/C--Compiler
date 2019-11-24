@@ -9,6 +9,9 @@ public class Parser {
     private Functions function;
     private Parameters parameter;
     private FunctionCallArguments functionCallArguments;
+    private CodeGeneration codegen;
+
+    //TODO check for operand agreement (mulop, relop?)
 
     public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
@@ -17,6 +20,7 @@ public class Parser {
         function = new Functions(variable);
         parameter = new Parameters();
         functionCallArguments = new FunctionCallArguments(function, parameter);
+        codegen = new CodeGeneration();
     }
 
     public String nextLexeme() { return tokens.getFirst().getLexeme(); }
@@ -24,6 +28,7 @@ public class Parser {
     public void removeToken() { tokens.removeFirst(); }
 
     public boolean isAccepted() {
+        System.out.println("Index\tOperation\tOperand_1\tOperand2\tResult\tOptional");
         program();
         //TODO test parameters here!
         function.checkForMain();
@@ -56,35 +61,19 @@ public class Parser {
         declaration_list_prime();
     }
 
-    //declaration-list_prime -> declaration declaration-list_prime | empty FIRSTS: int void ϵ FOLLOWS: $
-    public void declaration_list_prime() {
-        print_rule("declaration_list_prime");
-        if (tokens.isEmpty()) return;
-        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-            declaration();
-            declaration_list_prime();
-        }
-    }
-
-    // type specifier -> int | void FIRSTS: int void FOLLOWS: ID
-    public void type_specifier() {
-        print_rule("type_specifier");
-        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
-            if ( function.getType() == null || !function.getType().equals("void") )
-                function.setType(nextLexeme()); // TODO check if the function type is either !void or null before executing
-            variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
-            removeToken();
-        } else reject();
-    }
-
     //declaration -> type-specifier ID declaration_prime FIRSTS: int void FOLLOWS: $ int void
     public void declaration() {
         print_rule("declaration");
         if ( tokens.isEmpty() ) return;
+        CodeGeneration codegen = new CodeGeneration();
         type_specifier();
         if ( nextCategory().equals("ID") ) {
             function.setId(nextLexeme());
             variable.setId(nextLexeme());
+
+            codegen.setOperand1(nextLexeme());
+            codegen.setResult(nextLexeme());
+
             removeToken();
         }
         declaration_prime();
@@ -101,11 +90,43 @@ public class Parser {
         }
     }
 
+    //declaration-list_prime -> declaration declaration-list_prime | empty FIRSTS: int void ϵ FOLLOWS: $
+    public void declaration_list_prime() {
+        print_rule("declaration_list_prime");
+        if (tokens.isEmpty()) return;
+        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+            declaration();
+            declaration_list_prime();
+        }
+    }
+
+    // type specifier -> int | void FIRSTS: int void FOLLOWS: ID
+    public void type_specifier() {
+        print_rule("type_specifier");
+        if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+
+            codegen.setOperand2(nextLexeme());
+            codegen.setResult(nextLexeme());
+
+            if ( function.getType() == null || !function.getType().equals("void") )
+                function.setType(nextLexeme()); // TODO check if the function type is either !void or null before executing
+            variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
+            removeToken();
+        } else reject();
+    }
+
     //var-declaration_prime ->  ; | [ NUM ] ; FIRSTS: ; [ FOLLOWS: int void $
     public void var_declaration_prime() {
         print_rule("var_declaration_prime");
         if (tokens.isEmpty()) return;
+
+        codegen.setOperation("alloc");
+
         if ( nextLexeme().equals(";")) {
+
+            codegen.setOperand1("4");
+            codegen.printQuadruple();
+
             removeToken();
             variable.setIsArray("var");
             parameter.setIsArray("var");
@@ -132,6 +153,9 @@ public class Parser {
         print_rule("fun_declaration");
         if ( tokens.isEmpty() ) return;
         if ( nextLexeme().equals("(") ) {
+
+            codegen.setOperation("func");
+
             variable.createNewScope(); // variable scope starts after ( rather than { because of parameters
             removeToken();
             params();
