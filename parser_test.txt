@@ -1,7 +1,7 @@
 void main(void) {
-    int x[10];
     int y;
     int z;
+    int x[10];
     while ( x[y] > z*5 + y) {
         y = z + x[z] * y;
         y = z + y * y;

@@ -5,9 +5,13 @@ public class CodeGeneration {
     private String operation;
     private String operand1;
     private String operand2;
+    private String variableResult;
+    private String functionResult;
     private String result;
-    private boolean isbackpatch;
     private String backpatch;
+    private String tempResult;
+    private boolean isbackpatch;
+    private boolean isVariable;
 
     CodeGeneration() {
         this.index = 0;
@@ -16,10 +20,9 @@ public class CodeGeneration {
         this.operand2 = null;
         this.backpatch = null;
         this.isbackpatch = false;
-    }
-
-    public void incrementIndex() {
-        this.index++;
+        this.isVariable = true;
+        this.variableResult = null;
+        this.functionResult = null;
     }
 
     public void setOperation(String op) {
@@ -31,7 +34,20 @@ public class CodeGeneration {
     public void setOperand2(String operand2) {
         this.operand2 = operand2;
     }
-    public void setResult(String res) {
+
+    public void setTempResult(String res) {
+        this.tempResult = res;
+    }
+
+    public void setVariableResult(String res) {
+        this.variableResult = res;
+    }
+
+    public void setFunctionResult(String res) {
+        this.functionResult = res;
+    }
+
+    public void saveResult(String res) {
         this.result = res;
     }
     public void setBackpatch(String bp) {
@@ -62,14 +78,32 @@ public class CodeGeneration {
         return this.backpatch;
     }
 
-    public void printQuadruple() {
-        if ( this.operation == null ) {
-            System.out.println("Ooops! Forgot so set operation!");
-            System.exit(0);
-        }
-            System.out.println(this.index++ + "\t" + this.operation + "\t" + this.operand1 + "\t" + this.operand2 + "\t" + this.result);
+    public String getVariableResult() {
+        return this.variableResult;
     }
 
-    //TODO write a method that says if index, op, op1, op2, and result are complete, we increment index.
+    public void reset() {
+        this.operation = null;
+        this.operand1 = null;
+        this.backpatch = null;
+        this.isbackpatch = false;
+        this.isVariable = true;
+        this.variableResult = null;
+        this.functionResult = null;
+    }
+
+    public void printQuadruple() {
+        if ( this.operation == null || this.result == null ) {
+            System.out.println("Ooops! Forgot so set something!");
+            System.exit(0);
+        }
+        if ( this.variableResult != null ) {
+            System.out.println(this.index++ + "\t" + this.operation + "\t" + this.operand1 + "\t" + this.operand2 + "\t" + this.variableResult);
+
+        } else {
+            System.out.println(this.index++ + "\t" + this.operation + "\t" + this.operand1 + "\t" + this.operand2 + "\t" + this.functionResult);
+        }
+        reset();
+    }
 
 }

@@ -65,29 +65,18 @@ public class Parser {
     public void declaration() {
         print_rule("declaration");
         if ( tokens.isEmpty() ) return;
-        CodeGeneration codegen = new CodeGeneration();
         type_specifier();
         if ( nextCategory().equals("ID") ) {
             function.setId(nextLexeme());
             variable.setId(nextLexeme());
 
             codegen.setOperand1(nextLexeme());
-            codegen.setResult(nextLexeme());
+            codegen.saveResult(nextLexeme());
+            codegen.setTempResult(nextLexeme()); //TODO result should be an ID if it's a var, 0 if it is a void function, and 1 if it is an int function.
 
             removeToken();
         }
         declaration_prime();
-    }
-
-    //declaration_prime -> var-declaration_prime | fun-declaration FIRSTS: ( ; [ FOLLOWS: int void $
-    public void declaration_prime() {
-        print_rule("declaration_prime");
-        if (tokens.isEmpty()) return;
-        if (nextLexeme().equals("(")) {
-            fun_declaration();
-        } else {
-            var_declaration_prime();
-        }
     }
 
     //declaration-list_prime -> declaration declaration-list_prime | empty FIRSTS: int void ϵ FOLLOWS: $
@@ -105,14 +94,24 @@ public class Parser {
         print_rule("type_specifier");
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
 
-            codegen.setOperand2(nextLexeme());
-            codegen.setResult(nextLexeme());
+            codegen.setOperand2("");
 
             if ( function.getType() == null || !function.getType().equals("void") )
                 function.setType(nextLexeme()); // TODO check if the function type is either !void or null before executing
             variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
             removeToken();
         } else reject();
+    }
+
+    //declaration_prime -> var-declaration_prime | fun-declaration FIRSTS: ( ; [ FOLLOWS: int void $
+    public void declaration_prime() {
+        print_rule("declaration_prime");
+        if (tokens.isEmpty()) return;
+        if (nextLexeme().equals("(")) {
+            fun_declaration();
+        } else {
+            var_declaration_prime();
+        }
     }
 
     //var-declaration_prime ->  ; | [ NUM ] ; FIRSTS: ; [ FOLLOWS: int void $
@@ -137,6 +136,11 @@ public class Parser {
             removeToken();
             variable.checkArrayIndexIsNumber(nextLexeme());
             if ( nextCategory().equals("NUM") ) {
+
+                Integer value = Integer.valueOf(nextLexeme()) * 4;
+                codegen.setOperand1(value.toString());
+                codegen.printQuadruple();
+
                 removeToken();
                 if ( nextLexeme().equals("]") ) {
                     removeToken();
@@ -160,6 +164,11 @@ public class Parser {
             removeToken();
             params();
             if ( nextLexeme().equals(")") ) {
+
+                codegen.setOperand2("void");
+                codegen.setFunctionResult("0");
+                codegen.printQuadruple();
+
                 removeToken();
                 compound_statement();
             }
@@ -264,6 +273,9 @@ public class Parser {
         type_specifier();
         if ( nextCategory().equals("ID") ) {
             variable.setId(nextLexeme());
+
+            codegen.setVariableResult(nextLexeme());
+
             removeToken();
             var_declaration_prime();
         } else reject();
