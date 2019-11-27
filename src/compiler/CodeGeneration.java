@@ -1,7 +1,8 @@
 package compiler;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class CodeGeneration {
 
@@ -19,8 +20,8 @@ public class CodeGeneration {
     private boolean nextIsBackpatch;
     private boolean isVariable;
     private boolean hasTempCounter;
-    private List<String> codes;
-    private ArrayList<List<String>> quadruples;
+    private List<StringBuilder> quadruples;
+    private StringBuilder code;
     private int bpIndex;
 
     CodeGeneration() {
@@ -29,28 +30,18 @@ public class CodeGeneration {
         this.isBackpatch = false;
         this.isVariable = true;
         this.quadruples = new ArrayList<>();
-        this.codes = new ArrayList<>();
+        this.code = new StringBuilder();
     }
 
-    public void setOperation(String op) {
-        this.operation = op;
-    }
+    public void setOperation(String op) { this.operation = op; }
 
     public void setNextOperation(String op) {
         this.nextOperation = op;
     }
 
-    public void setOperand1(String operand1) {
-        this.operand1 = operand1;
-    }
+    public void setOperand1(String operand1) { this.operand1 = operand1; }
 
-    public void setOperand2(String operand2) {
-        this.operand2 = operand2;
-    }
-
-    public void setTempResult(String res) {
-        this.tempResult = res;
-    }
+    public void setOperand2(String operand2) { this.operand2 = operand2; }
 
     public void setResult(String res) {
         this.result = res;
@@ -80,65 +71,60 @@ public class CodeGeneration {
     }
 
     public void printQuadruples() {
-        for(List<String> instructions: quadruples) {
-            for (String quads : codes) {
-                if ( !this.hasTempCounter) {
-                    System.out.print(this.index + " " + this.operation + " " + this.operand1 + " " + this.operand2 + " " + this.result);
-                } else {
-                    System.out.println(this.index + " " + this.operation + " " + this.operand1 + " " + this.operand2 + " " + "t" + this.tempCounter);
-                }
-            }
-        System.out.println();
+        Iterator it = quadruples.iterator();
+        while ( it.hasNext() ) {
+           // System.out.println(this.code);
         }
     }
 
-    public void addCodes() {
+    public void joinCodes() {
         index++;
-        codes.add(this.index.toString());
-        codes.add("\t");
-        codes.add(this.operation);
-        codes.add("\t");
-        codes.add(this.operand1);
-        codes.add("\t");
-        codes.add(this.operand2);
-        codes.add("\t");
+        code.append(this.index);
+        code.append("\t");
+        code.append(this.operation);
+        code.append("\t");
+        code.append(this.operand1);
+        code.append("\t");
+        code.append(this.operand2);
+        code.append("\t");
     }
 
     public void createQuadruple(boolean usingTempCounter) {
 
-        if ( !usingTempCounter) {
-            codes.add(this.result);
-            this.addCodes();
-            this.quadruples.add(codes);
-            System.out.println(this.index++ + "\t" + this.operation + "\t" + this.operand1 + "\t" + this.operand2 + "\t" + this.result);
-        } else if ( usingTempCounter) {
-            this.addCodes();
+        if ( !usingTempCounter) { // there is no t_i for this quadruple
+            this.joinCodes();
+            code.append(this.result);
+            //System.out.println(this.code.toString());
+            this.quadruples.add(code);
+        } else  { // there is a t_i for this quadruple
+            this.joinCodes();
             tempCounter++;
-            codes.add("t" + tempCounter);
-            this.quadruples.add(codes);
-            System.out.println(this.index++ + "\t" + this.operation + "\t" + this.operand1 + "\t" + this.operand2 + "\t" + "t" + tempCounter++);
+            code.append("t" + this.tempCounter);
+            //System.out.println(this.code.toString());
+            this.quadruples.add(code);
         }
 
         if ( this.nextIsBackpatch ) {
-            this.isBackpatch = true;
-            this.nextIsBackpatch = false;
-            this.operation = this.nextOperation;
+            this.isBackpatch = true; // set current operation to backpatch mode
+            this.nextIsBackpatch = false; // turn off nextIsBackpatch
+            this.operation = this.nextOperation; // copy nextOperation to thisoperation
+            this.nextOperation = null; // turn off nextOperation
         }
 
         if ( isBackpatch ) {
 
             Integer index = this.index;
             String indx = index.toString();
-            codes.add(indx);
-            codes.add(this.operation);
-            codes.add("t" + this.tempCounter);
-            codes.add("\t");
-            codes.add("\t");
-            codes.add("\t");
-            codes.add(null); // the index we jump to if the backpatch operation is satisfied
-            codes.add("bp = " + this.bpIndex++);
-            quadruples.add(codes);
-            System.out.println(this.index++ + "\t" + this.operand1 + "\t" + " " + this.bpIndex);
+            code.append(indx);
+            code.append(this.operation);
+            code.append("t" + this.tempCounter);
+            code.append("\t");
+            code.append("\t");
+            code.append("\t");
+            code.append("?"); // the index we jump to if the backpatch operation is satisfied
+            code.append("bp = " + this.bpIndex++);
+            System.out.println(this.code.toString());
+            quadruples.add(code);
         }
 
         //reset();
