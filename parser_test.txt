@@ -1,9 +1,29 @@
+int sub(int z) {
+    int g[100];
+    int h;
+    int i;
+    if ( x > y)
+        return(z+z);
+    else
+        x = 5;
+}
 
 void main(void) {
-	a = yeetsub(4); // should throw an error since yeetsub() is undeclared. Also should throw an error if parameters and arguments do not match!
-	sub(4, 6);
-	intmainvoid(a = 4 + 4, b, c, d); // error because undeclared function
-	newsub(); // error because undeclared function
-	return;
+    int y;
+    int z;
+    int x[10];
+    while ( x[y] > z*5 + y) {
+        y = z + x[z] * y;
+        y = z + y * y;
+    }
+    z = 8;
 }
+
+//void main(void) {
+//	a = yeetsub(4); // should throw an error since yeetsub() is undeclared. Also should throw an error if parameters and arguments do not match!
+//	sub(4, 6);
+//	intmainvoid(a = 4 + 4, b, c, d); // error because undeclared function
+//	newsub(); // error because undeclared function
+//	return;
+//}
 

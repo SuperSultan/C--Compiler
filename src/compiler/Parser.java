@@ -9,6 +9,9 @@ public class Parser {
     private Functions function;
     private Parameters parameter;
     private FunctionCallArguments functionCallArguments;
+    private CodeGeneration codegen;
+
+    //TODO check for operand agreement (mulop, relop?)
 
     public Parser (ArrayDeque<Token> theTokens) {
         isAccept = true;
@@ -17,6 +20,7 @@ public class Parser {
         function = new Functions(variable);
         parameter = new Parameters();
         functionCallArguments = new FunctionCallArguments(function, parameter);
+        codegen = new CodeGeneration();
     }
 
     public String nextLexeme() { return tokens.getFirst().getLexeme(); }
@@ -24,9 +28,11 @@ public class Parser {
     public void removeToken() { tokens.removeFirst(); }
 
     public boolean isAccepted() {
+        System.out.println("Index\tOperation\tOperand_1\tOperand2\tResult\tOptional");
         program();
         //TODO test parameters here!
         function.checkForMain();
+        codegen.printQuadruples();
         return nextLexeme().equals("$") && isAccept;
     }
 
@@ -56,6 +62,23 @@ public class Parser {
         declaration_list_prime();
     }
 
+    //declaration -> type-specifier ID declaration_prime FIRSTS: int void FOLLOWS: $ int void
+    public void declaration() {
+        print_rule("declaration");
+        if ( tokens.isEmpty() ) return;
+        type_specifier();
+        if ( nextCategory().equals("ID") ) {
+            function.setId(nextLexeme());
+            variable.setId(nextLexeme());
+
+            codegen.setOperand1(nextLexeme());
+            codegen.setResult(nextLexeme());
+
+            removeToken();
+        }
+        declaration_prime();
+    }
+
     //declaration-list_prime -> declaration declaration-list_prime | empty FIRSTS: int void ϵ FOLLOWS: $
     public void declaration_list_prime() {
         print_rule("declaration_list_prime");
@@ -70,24 +93,14 @@ public class Parser {
     public void type_specifier() {
         print_rule("type_specifier");
         if ( nextLexeme().equals("int") || nextLexeme().equals("void") ) {
+
+            codegen.setOperand2("\t");
+
             if ( function.getType() == null || !function.getType().equals("void") )
                 function.setType(nextLexeme()); // TODO check if the function type is either !void or null before executing
             variable.setType(nextLexeme()); // do not set parameter.type here. Do it in params()
             removeToken();
         } else reject();
-    }
-
-    //declaration -> type-specifier ID declaration_prime FIRSTS: int void FOLLOWS: $ int void
-    public void declaration() {
-        print_rule("declaration");
-        if ( tokens.isEmpty() ) return;
-        type_specifier();
-        if ( nextCategory().equals("ID") ) {
-            function.setId(nextLexeme());
-            variable.setId(nextLexeme());
-            removeToken();
-        }
-        declaration_prime();
     }
 
     //declaration_prime -> var-declaration_prime | fun-declaration FIRSTS: ( ; [ FOLLOWS: int void $
@@ -105,7 +118,14 @@ public class Parser {
     public void var_declaration_prime() {
         print_rule("var_declaration_prime");
         if (tokens.isEmpty()) return;
+
+        codegen.setOperation("alloc");
+
         if ( nextLexeme().equals(";")) {
+
+            codegen.setOperand1("4");
+            codegen.createQuadruple(false);
+
             removeToken();
             variable.setIsArray("var");
             parameter.setIsArray("var");
@@ -116,6 +136,11 @@ public class Parser {
             removeToken();
             variable.checkArrayIndexIsNumber(nextLexeme());
             if ( nextCategory().equals("NUM") ) {
+
+                Integer value = Integer.valueOf(nextLexeme()) * 4;
+                codegen.setOperand1(value.toString());
+                codegen.createQuadruple(false);
+
                 removeToken();
                 if ( nextLexeme().equals("]") ) {
                     removeToken();
@@ -132,10 +157,19 @@ public class Parser {
         print_rule("fun_declaration");
         if ( tokens.isEmpty() ) return;
         if ( nextLexeme().equals("(") ) {
+
+            codegen.setOperation("func");
+
             variable.createNewScope(); // variable scope starts after ( rather than { because of parameters
             removeToken();
             params();
             if ( nextLexeme().equals(")") ) {
+
+                codegen.setOperand2("void");
+                //codegen.setFunctionResult("0");
+                codegen.setResult("0");
+                codegen.createQuadruple(false);
+
                 removeToken();
                 compound_statement();
             }
@@ -148,10 +182,28 @@ public class Parser {
         if ( nextLexeme().equals("int") ) {
             variable.setType(nextLexeme());
             parameter.setType(nextLexeme());
+
+            codegen.setOperand2(nextLexeme());
+            //codegen.setFunctionResult("1");
+            codegen.setResult("1");
+            codegen.createQuadruple(false);
+
             removeToken();
             if ( nextCategory().equals("ID") ) {
                 variable.setId(nextLexeme());
                 parameter.setId(nextLexeme());
+
+                codegen.setParam(nextLexeme()); // save the operation AND result!
+
+                codegen.setOperation("alloc");
+                codegen.setOperand1("4");
+                codegen.setResult(nextLexeme());
+                //codegen.setVariableResult(nextLexeme());
+                codegen.createQuadruple(false);
+                //codegen.setOperand2("");
+                //codegen.setFunctionResult(nextLexeme());
+
+
                 removeToken();
                 param_prime();
                 param_list_prime();
@@ -240,6 +292,10 @@ public class Parser {
         type_specifier();
         if ( nextCategory().equals("ID") ) {
             variable.setId(nextLexeme());
+
+            //codegen.setVariableResult(nextLexeme());
+            codegen.setResult(nextLexeme());
+
             removeToken();
             var_declaration_prime();
         } else reject();
@@ -316,6 +372,10 @@ public class Parser {
     public void selection_statement() {
         print_rule("selection_statement");
         if ( nextLexeme().equals("if") ) {
+
+            codegen.setNextIsbackpatch(true);
+            codegen.setOperation("compr");
+
             removeToken();
             if ( nextLexeme().equals("(") ) {
                 removeToken();
@@ -387,6 +447,9 @@ public class Parser {
         if ( nextCategory().equals("NUM") ) {
             function.setReturn(nextLexeme());
             variable.setId(nextLexeme());
+
+            codegen.setOperand1(nextLexeme());
+
             removeToken();
             term_prime();
             additive_expression_prime();
@@ -395,6 +458,9 @@ public class Parser {
         if ( nextCategory().equals("ID") ) {
             function.setReturn(nextLexeme());
             variable.setId(nextLexeme());
+
+            codegen.setOperand1(nextLexeme());
+
             removeToken();
             expression_prime();
         }
@@ -506,6 +572,10 @@ public class Parser {
             } else reject();
         }
         if ( nextCategory().equals("ID") ) {
+
+            codegen.setOperand2(nextLexeme());
+            codegen.createQuadruple(true); // temporary result used here
+
             removeToken();
             factor_prime();
         }
@@ -603,6 +673,21 @@ public class Parser {
     public void relop() {
         print_rule("relop");
         if ( nextLexeme().matches("<=|>=|==|!=|>|<") ) {
+
+            if ( nextLexeme().equals("<") ) {
+                codegen.setNextOperation("brge");
+            } else if ( nextLexeme().equals(">") ) {
+                codegen.setNextOperation("brle");
+            } else if ( nextLexeme().equals("==") ) {
+                codegen.setNextOperation("brneq");
+            } else if ( nextLexeme().equals("!=") ) {
+                codegen.setNextOperation("breq");
+            } else if ( nextLexeme().equals("<=") ) {
+                codegen.setNextOperation("brgt");
+            } else if ( nextLexeme().equals(">=") ) {
+                codegen.setNextOperation("brlt");
+            }
+
             removeToken();
         } else reject();
     }

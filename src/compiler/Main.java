@@ -23,8 +23,10 @@ public class Main {
         Parser parser = new Parser(tokens);
         System.out.println(parser.isAccepted() ? "ACCEPT" : "REJECT");
 
-        //SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(nodes);
+        //SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(nodes); // Make a seaprate class for this later
         //System.out.println(semanticAnalyzer.isAccepted() ? "ACCEPT" : "REJECT");
+
+
     }
 
 }
