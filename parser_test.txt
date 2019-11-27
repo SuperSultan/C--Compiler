@@ -1,3 +1,13 @@
+int sub(int z) {
+    int g[100];
+    int h;
+    int i;
+    if ( x > y)
+        return(z+z);
+    else
+        x = 5;
+}
+
 void main(void) {
     int y;
     int z;
