@@ -1,8 +1,8 @@
-int sub(int z) {
+int sub(int z, int q, int r) {
     int g[100];
     int h;
     int i;
-    if ( x > y)
+    if ( x > y )
         return(z+z);
     else
         x = 5;
