@@ -270,10 +270,6 @@ public class Parser {
                 codegen.setOperand1("4");
                 codegen.setResult(nextLexeme());
                 codegen.createStatementQuadruple();
-                //codegen.setOperation("param");
-                //codegen.setOperand1("");
-                //codegen.setOperand2("");
-                //codegen.createStatementQuadruple();
 
                 variable.setId(nextLexeme());
                 parameter.setId(nextLexeme());
@@ -382,7 +378,6 @@ public class Parser {
         print_rule("selection_statement");
         if ( nextLexeme().equals("if") ) {
 
-           // codegen.setNextIsbackpatch(true);
             codegen.setOperation("compr");
 
             removeToken();
@@ -428,6 +423,9 @@ public class Parser {
     public void return_statement() {
         print_rule("return_statement");
         if ( nextLexeme().equals("return") ) {
+
+            codegen.setSecondaryOperation(nextLexeme());
+
             removeToken();
             return_statement_prime();
         } else reject();
@@ -534,7 +532,15 @@ public class Parser {
     // simple-expression_prime -> relop additive-expression | empty FIRSTS: <= < > >= == != empty FOLLOWS: , ) ; ]
     public void simple_expression_prime() {
         print_rule("simple_expression_prime");
-        if ( nextLexeme().equals(",") || nextLexeme().equals(")") || nextLexeme().equals(";") || nextLexeme().equals("]") ) return;
+        if ( nextLexeme().equals(",") || nextLexeme().equals(")") || nextLexeme().equals(";") || nextLexeme().equals("]") ) {
+
+            codegen.setOperand1("\t");
+            codegen.setOperand2("\t");
+            codegen.setOperation(codegen.getSecondaryOperation());
+            codegen.gettCount();
+            codegen.createStatementQuadruple();
+            return;
+        }
         if ( nextLexeme().matches("<=|>=|==|!=|<|>") ) {
             relop();
             additive_expression();
@@ -583,7 +589,27 @@ public class Parser {
         if ( nextCategory().equals("ID") ) {
 
             codegen.setOperand2(nextLexeme());
-            //codegen.createQuadruple(true); // temporary result used here
+            codegen.setResult("t" + codegen.gettCount().toString());
+            codegen.createStatementQuadruple();
+
+            codegen.setOperation(codegen.getSecondaryOperation()); // "return"
+            codegen.setOperand1("\t");
+            codegen.setOperand2("\t");
+            codegen.createStatementQuadruple();
+
+            if ( codegen.getSecondaryOperation() != null && codegen.getSecondaryOperation().equals("return") ) {
+                codegen.setOperation("br");
+                codegen.setResult("?"); // backpatch unknown
+                codegen.createStatementQuadruple();
+            }
+
+            codegen.setOperand1(codegen.getResult());
+            codegen.setOperand2("\t");
+            codegen.setResult("?"); // backpatch unknown
+            codegen.createConditionalQuadruple();
+            codegen.resetConditionalQuadruple();
+
+            //codegen.resetSecondaryOperation();
 
             removeToken();
             factor_prime();
@@ -674,6 +700,10 @@ public class Parser {
     public void addop() {
         print_rule("addop");
         if ( nextLexeme().matches("\\+|-") ) {
+
+            if ( nextLexeme().equals("+") ) codegen.setOperation("add");
+            else codegen.setOperation("sub");
+
             removeToken();
         } else reject();
     }
@@ -684,17 +714,17 @@ public class Parser {
         if ( nextLexeme().matches("<=|>=|==|!=|>|<") ) {
 
             if ( nextLexeme().equals("<") ) {
-         //       codegen.setNextOperation("brge");
+                codegen.setNextOperation("brge");
             } else if ( nextLexeme().equals(">") ) {
-      //          codegen.setNextOperation("brle");
+                codegen.setNextOperation("brle");
             } else if ( nextLexeme().equals("==") ) {
-        //        codegen.setNextOperation("brneq");
+                codegen.setNextOperation("brneq");
             } else if ( nextLexeme().equals("!=") ) {
-        //        codegen.setNextOperation("breq");
+                codegen.setNextOperation("breq");
             } else if ( nextLexeme().equals("<=") ) {
-        //        codegen.setNextOperation("brgt");
+                codegen.setNextOperation("brgt");
             } else if ( nextLexeme().equals(">=") ) {
-        //        codegen.setNextOperation("brlt");
+                codegen.setNextOperation("brlt");
             }
 
             removeToken();
