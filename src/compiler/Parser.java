@@ -32,7 +32,11 @@ public class Parser {
         program();
         //TODO test parameters here!
         function.checkForMain();
-        codegen.printQuadruples();
+        //codegen.getQuadruples();
+        List<String> removedNullsQuads = codegen.removeNulls();
+        List<String> fixedBackPatches = codegen.fixBackPatches(removedNullsQuads);
+        List<String> fixedBackPatchesTwo = codegen.fixBackPatchesTwo(fixedBackPatches);
+        codegen.printQuadruples(fixedBackPatchesTwo);
         return nextLexeme().equals("$") && isAccept;
     }
 
@@ -298,7 +302,6 @@ public class Parser {
         if ( nextCategory().equals("ID") ) {
             variable.setId(nextLexeme());
 
-            //codegen.setVariableResult(nextLexeme());
             codegen.setResult(nextLexeme());
 
             removeToken();
@@ -309,7 +312,12 @@ public class Parser {
     // statement-list -> statement statement-list | empty FIRSTS NUM ID ( ; { if while return empty FOLLOWS: }
     public void statement_list() {
         print_rule("statement_list");
-        if ( nextLexeme().equals("}") ) return;
+        if ( nextLexeme().equals("}") ) {
+
+            System.out.println(codegen.getIndex().toString() + " end \t\t\t" + "block");
+
+            return;
+        }
         if ( nextCategory().equals("NUM") || nextCategory().equals("ID") || nextLexeme().matches("\\(|;|if|return|while|\\{") ) {
             statement();
             statement_list();
@@ -467,6 +475,7 @@ public class Parser {
             variable.setId(nextLexeme());
 
             codegen.setOperand1(nextLexeme());
+            codegen.setOperand2(nextLexeme());
 
             removeToken();
             expression_prime();
@@ -487,6 +496,11 @@ public class Parser {
     public void expression_prime() {
         print_rule("expression_prime");
         if ( nextLexeme().equals("=") ) {
+
+            codegen.setOperation("assgn");
+            codegen.setOperand1("\t");
+            codegen.setResult(codegen.getOperand1());
+
             removeToken();
             expression();
         }
@@ -534,11 +548,19 @@ public class Parser {
         print_rule("simple_expression_prime");
         if ( nextLexeme().equals(",") || nextLexeme().equals(")") || nextLexeme().equals(";") || nextLexeme().equals("]") ) {
 
+
+
+            if ( codegen.getOperation().equals("assgn") )
+                codegen.createStatementQuadruple();
+
             codegen.setOperand1("\t");
             codegen.setOperand2("\t");
             codegen.setOperation(codegen.getSecondaryOperation());
             codegen.gettCount();
-            codegen.createStatementQuadruple();
+
+            if ( !codegen.getOperand1().equals("\t") || !codegen.getOperand2().equals("\t") )
+                codegen.createStatementQuadruple();
+
             return;
         }
         if ( nextLexeme().matches("<=|>=|==|!=|<|>") ) {
@@ -592,13 +614,12 @@ public class Parser {
             codegen.setResult("t" + codegen.gettCount().toString());
             codegen.createStatementQuadruple();
 
-            codegen.setOperation(codegen.getSecondaryOperation()); // "return"
+            codegen.setOperation(codegen.getSecondaryOperation());
             codegen.setOperand1("\t");
             codegen.setOperand2("\t");
-            codegen.createStatementQuadruple();
 
             if ( codegen.getSecondaryOperation() != null && codegen.getSecondaryOperation().equals("return") ) {
-                codegen.setOperation("br");
+                codegen.setOperation("brk");
                 codegen.setResult("?"); // backpatch unknown
                 codegen.createStatementQuadruple();
             }
@@ -622,7 +643,15 @@ public class Parser {
     // term_prime -> mulop factor term_prime | empty FIRSTS: * / empty FOLLOWS: + - <= < > >= == != , ) ; ] NUM ( ID
     public void term_prime() {
         print_rule("term_prime");
-        if ( nextLexeme().matches("!=|\\)|\\+|,|-|;|<=|==|>=|<|>|]|\\(") || nextCategory().equals("NUM") || nextCategory().equals("ID") ) return;
+        if ( nextLexeme().matches("!=|\\)|\\+|,|-|;|<=|==|>=|<|>|]|\\(") || nextCategory().equals("NUM") || nextCategory().equals("ID") ) {
+
+           // if ( codegen.getOperation() != null && codegen.getOperation().equals("return") ) {
+        //         // TODO fix duplicate returns
+                //codegen.resetStatementQuadruple();
+          //  }
+            return;
+
+        }
         if ( nextLexeme().equals("*") || nextLexeme().equals("/") ) {
             mulop();
             factor();
@@ -660,6 +689,14 @@ public class Parser {
             return;
         }
         if ( nextCategory().equals("ID") || nextCategory().equals("NUM") ) {
+
+            codegen.setOperand1("\t");
+            codegen.setOperand2("\t");
+            codegen.setOperation("arg");
+            codegen.setPreviousOperation("arg");
+            codegen.setResult(nextLexeme());
+            codegen.createStatementQuadruple();
+
             arg_list();
             functionCallArguments.checkType(nextLexeme()); // TODO test this: validate type of current argument against type of current parameter
         }
@@ -680,7 +717,12 @@ public class Parser {
     // arg_list_prime -> , expression arg-list_prime | empty FIRSTS: , empty FOLLOWS: )
     public void arg_list_prime() {
         print_rule("arg_list_prime");
-        if ( nextLexeme().equals(")") ) return;
+        if ( nextLexeme().equals(")") ) {
+
+
+
+            return;
+        }
         if ( nextLexeme().equals(",") ) {
             removeToken();
             expression();

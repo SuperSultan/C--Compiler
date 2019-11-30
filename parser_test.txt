@@ -11,10 +11,10 @@ int sub(int z, int q, int r) {
 void main(void) {
     int y;
     int z;
-    int x[10];
-    while ( x[y] > z*5 + y) {
-        y = z + x[z] * y;
-        y = z + y * y;
+    y = sub(x);
+    while ( x + 3 * y > 5 ) {
+        x = y + m / z;
+        m = x - y + z * m / z;
     }
     z = 8;
 }
