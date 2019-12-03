@@ -7,126 +7,76 @@ import java.util.Iterator;
 public class CodeGeneration {
 
     private Integer index;
-    private Integer tempCounter;
     private String operation;
+    private String secondaryOperation;
     private String nextOperation;
     private String operand1;
     private String operand2;
-    private String paramResult;
+    private Integer tCount;
     private String result;
-    private String backpatch;
-    private String tempResult;
-    private boolean isBackpatch;
-    private boolean nextIsBackpatch;
-    private boolean isVariable;
-    private boolean hasTempCounter;
-    private List<StringBuilder> quadruples;
-    private StringBuilder code;
-    private int bpIndex;
+
+    private List<String> statements;
+    private List<String> conditionals;
 
     CodeGeneration() {
         this.index = 0;
-        this.tempCounter = 0;
-        this.isBackpatch = false;
-        this.isVariable = true;
-        this.quadruples = new ArrayList<>();
-        this.code = new StringBuilder();
+        this.tCount = 0;
+        this.conditionals = new ArrayList<>();
     }
+
+    public Integer getCurrentCount() { return this.tCount--; }
+
+    public String getSecondaryOperation() { return this.secondaryOperation; }
+
+    public String getOperand1() { return this.operand1; }
+
+    public Integer gettCount() { return this.tCount++; }
+
+    public String getResult() { return this.result; }
 
     public void setOperation(String op) { this.operation = op; }
 
-    public void setNextOperation(String op) {
-        this.nextOperation = op;
-    }
+    public void setSecondaryOperation(String secondaryOp) { this.secondaryOperation = secondaryOp; }
+
+    public void setNextOperation(String nextOp) { this.nextOperation = nextOp; }
 
     public void setOperand1(String operand1) { this.operand1 = operand1; }
 
     public void setOperand2(String operand2) { this.operand2 = operand2; }
 
-    public void setResult(String res) {
-        this.result = res;
+    public void settCount(Integer i) { this.tCount = i; }
+
+    public void setResult(String res) { this.result = res; }
+
+    public void printQuadruples() {}
+
+    public void resetSecondaryOperation() { this.secondaryOperation = null;}
+
+    public void createStatementQuadruple() {
+        //if ( this.operation == null || this.operation.isEmpty() || this.operand1 == null || this.operand1.isEmpty() ||
+      //          this.operand2 == null || this.operand2.isEmpty() || this.result == null || this.result.isEmpty() ) return;
+
+        if ( this.operation == null || this.operation.isEmpty() || this.result == null || this.result.isEmpty() && !this.operation.equals("end") ) return;
+
+        this.index++;
+        String statement = String.join("\t", this.index.toString(), this.operation, this.operand1, this.operand2, this.result);
+        System.out.println(statement);
     }
 
-    public void setParam(String parameter) {
-        this.operation = "param";
-        this.paramResult = parameter;
-        System.out.println(this.index++ + "\t" + this.operation + "\t" + " " + "\t" + " " + "\t" + this.paramResult);
-        reset();
+    public void createConditionalQuadruple() {
+        if ( this.nextOperation == null || this.nextOperation.isEmpty() || this.operand1 == null || this.operand1.isEmpty()
+                || this.operand2 == null || this.operand2.isEmpty() || this.result == null || this.result.isEmpty() ) return;
+
+        this.index++;
+        String statement = String.join("\t", this.index.toString(), this.nextOperation, this.operand1, this.operand2, this.result, "bp = " + this.index);
+        System.out.println(statement);
     }
 
-    public void setNextIsbackpatch(Boolean isbp) {
-        this.nextIsBackpatch = isbp;
-    }
-
-    public void reset() {
-        this.operation = null;
+    public void resetConditionalQuadruple() {
         this.nextOperation = null;
         this.operand1 = null;
         this.operand2 = null;
-        this.backpatch = null;
-        this.isBackpatch = false;
-        this.isVariable = true;
         this.result = null;
-        this.paramResult = null;
     }
 
-    public void printQuadruples() {
-        Iterator it = quadruples.iterator();
-        while ( it.hasNext() ) {
-           // System.out.println(this.code);
-        }
-    }
-
-    public void joinCodes() {
-        index++;
-        code.append(this.index);
-        code.append("\t");
-        code.append(this.operation);
-        code.append("\t");
-        code.append(this.operand1);
-        code.append("\t");
-        code.append(this.operand2);
-        code.append("\t");
-    }
-
-    public void createQuadruple(boolean usingTempCounter) {
-
-        if ( !usingTempCounter) { // there is no t_i for this quadruple
-            this.joinCodes();
-            code.append(this.result);
-            //System.out.println(this.code.toString());
-            this.quadruples.add(code);
-        } else  { // there is a t_i for this quadruple
-            this.joinCodes();
-            tempCounter++;
-            code.append("t" + this.tempCounter);
-            //System.out.println(this.code.toString());
-            this.quadruples.add(code);
-        }
-
-        if ( this.nextIsBackpatch ) {
-            this.isBackpatch = true; // set current operation to backpatch mode
-            this.nextIsBackpatch = false; // turn off nextIsBackpatch
-            this.operation = this.nextOperation; // copy nextOperation to thisoperation
-            this.nextOperation = null; // turn off nextOperation
-        }
-
-        if ( isBackpatch ) {
-
-            Integer index = this.index;
-            String indx = index.toString();
-            code.append(indx);
-            code.append(this.operation);
-            code.append("t" + this.tempCounter);
-            code.append("\t");
-            code.append("\t");
-            code.append("\t");
-            code.append("?"); // the index we jump to if the backpatch operation is satisfied
-            code.append("bp = " + this.bpIndex++);
-            System.out.println(this.code.toString());
-            quadruples.add(code);
-        }
-
-        //reset();
-    }
 }
