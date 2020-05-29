@@ -113,7 +113,7 @@ public class CodeGeneration {
                 bpIndexes.add(bpIndex2);
             }
         }
-        System.out.println(bpIndexes);
+      //  System.out.println(bpIndexes);
         for(int j=0; j<newQuads.size(); j++) {
             String curr = newQuads.get(j);
             if ( bpIndexes.size() !=0 ) {
@@ -124,6 +124,13 @@ public class CodeGeneration {
                 }
             }
         }
+
+        for(int k=0; k<newQuads.size(); k++) {
+            if ( newQuads.get(k).contains("?") ) {
+                newQuads.remove(newQuads.get(k)); // remove extra "?"
+            }
+        }
+
         return newQuads;
     }
 
@@ -141,7 +148,7 @@ public class CodeGeneration {
         this.index++;
         String statement = String.join("\t", this.index.toString(), this.operation, this.operand1, this.operand2, this.result);
         quadruples.add(statement);
-        System.out.println(statement);
+  //      System.out.println(statement);
     }
 
     public void createConditionalQuadruple() {
@@ -152,7 +159,7 @@ public class CodeGeneration {
         String statement = String.join("\t", this.index.toString(), this.nextOperation, this.operand1, this.operand2, this.result, "bp = " + this.index);
         // TODO add to list
         quadruples.add(statement);
-        System.out.println(statement);
+  //      System.out.println(statement);
     }
 
     public void resetStatementQuadruple() {

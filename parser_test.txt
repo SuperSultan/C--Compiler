@@ -8,15 +8,11 @@ int sub(int z, int q, int r) {
         x = 5;
 }
 
-void main(void) {
-    int y;
-    int z;
-    y = sub(x);
-    while ( x + 3 * y > 5 ) {
-        x = y + m / z;
-        m = x - y + z * m / z;
-    }
-    z = 8;
+void main(void)
+{
+   int x[10];
+   int y;
+   y = (x[5] + 2) * y;
 }
 
 //void main(void) {

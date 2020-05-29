@@ -56,11 +56,11 @@ public class Functions {
     }
 
     public void functionSymbolTableTest() {
-        if ( list.size() == 0) System.out.println("Empty functionSymbolTable");
+      //  if ( list.size() == 0) System.out.println("Empty functionSymbolTable");
         for(Map.Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
             String type = entry.getKey();
             List<String> values = entry.getValue();
-            System.out.println("FUNCTION TYPE " + type + " VALUES: " + values.toString());
+     //       System.out.println("FUNCTION TYPE " + type + " VALUES: " + values.toString());
         }
     }
 
@@ -68,13 +68,13 @@ public class Functions {
         Map<String,LinkedList<String>> new_scope = new HashMap<>();
         list.add(new_scope);
         ++scopeSize;
-        System.out.println("Created new function scope. Current function scope size: " + this.scopeSize);
+    //    System.out.println("Created new function scope. Current function scope size: " + this.scopeSize);
     }
 
     public void removeScope() {
         if ( !list.isEmpty() ) {
             --scopeSize;
-            System.out.println("Deleted function scope Current function scope size: " + this.scopeSize);
+ //           System.out.println("Deleted function scope Current function scope size: " + this.scopeSize);
         }
         this.functionSymbolTableTest();
     }
@@ -85,7 +85,7 @@ public class Functions {
                 LinkedList<String> values = entry.getValue();
                 String id = values.getFirst();
                 if ( ! id.equals("main")) {
-                    System.out.println("Error: void main(void) should be the last declared function!");
+    //                System.out.println("Error: void main(void) should be the last declared function!");
                     reject();
                 }
             }
@@ -95,7 +95,7 @@ public class Functions {
     public void put(String key, String id, String rT) {
         for(Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
             if (entry.getValue().contains(id)) {
-                System.out.println("Error: " + id + " is already defined!");
+    //            System.out.println("Error: " + id + " is already defined!");
                 reject();
             }
         }
@@ -104,8 +104,8 @@ public class Functions {
         functionData.add(rT);
         symbols.put(key,functionData);
         checkReturnTypes();
-        System.out.println("Added " + key + " " + id + " " + rT + " to function symbol table!");
-        System.out.println("Functions in current scope: " + this.symbols.size());
+  //      System.out.println("Added " + key + " " + id + " " + rT + " to function symbol table!");
+  //      System.out.println("Functions in current scope: " + this.symbols.size());
         this.setType(null);
         this.setId(null);
         this.setReturn(null);
@@ -116,14 +116,14 @@ public class Functions {
         for (Map.Entry<String, LinkedList<String>> function : symbols.entrySet()) {
 
             if ( this.type.equals("int") &&  ( !this.returnType.matches("^[a-zA-Z0-9]*$") || this.returnType.equals("void") )) {
-                System.out.println("Error: int function " + id + " should return a value!"); // checks if rT is a string or if it is void
+   //             System.out.println("Error: int function " + id + " should return a value!"); // checks if rT is a string or if it is void
                 reject();
             }
             if (this.type.equals("int") &&  ( function.getValue().getLast() == null) ) {
-                System.out.println("Error: int function " + id + " cannot return void!");
+  //              System.out.println("Error: int function " + id + " cannot return void!");
             }
             if (this.type.equals("void") && !this.returnType.equals("void")) {
-                System.out.println("Error: void function " + id + " cannot return a value!");
+   //             System.out.println("Error: void function " + id + " cannot return a value!");
                 reject();
             }
         }
