@@ -38,14 +38,14 @@ public class Parameters {
 
     public void put(String type) {
         if ( type.equals("void") ) {
-            System.out.println("Added void parameter to symbol table");
+      //      System.out.println("Added void parameter to symbol table");
             symbols.put(type, null);
         }
     }
 
     public void put(String type, String id, String arr) {
         if ( type.equals("void") ) {
-            System.out.println("Error: void parameter with " + id + " identifier!");
+    //        System.out.println("Error: void parameter with " + id + " identifier!");
             reject();
         }
         LinkedList<String> values = new LinkedList<>();
@@ -53,8 +53,8 @@ public class Parameters {
         values.addLast(arr);
         symbols.put(type,values);
         ++numberOfParameters;
-        System.out.println("Added " + type + " " + id + " " + " to parameter symbol table. isArray? " + arr);
-        System.out.println("Number of parameters in parameter symbol table: " + symbols.size() );
+   //     System.out.println("Added " + type + " " + id + " " + " to parameter symbol table. isArray? " + arr);
+  //      System.out.println("Number of parameters in parameter symbol table: " + symbols.size() );
         this.type = null;
         this.id = null;
         this.arr = null;

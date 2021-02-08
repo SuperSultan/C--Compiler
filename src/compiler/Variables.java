@@ -59,19 +59,19 @@ public class Variables {
 
     public void put(String type, String id, String isArray) {
         if ( symbols.containsValue(id) ) {
-            System.out.println("Error: " + id + " was already defined");
+     //       System.out.println("Error: " + id + " was already defined");
             reject();
         }
         if ( type.equals("void") ) {
-            System.out.println("Error: variables cannot be of type void!");
+      //      System.out.println("Error: variables cannot be of type void!");
             reject();
         } else {
             LinkedList<String> values = new LinkedList<>();
             values.addFirst(id);
             values.addLast(isArray);
             symbols.put(type, values);
-            System.out.println("Added " + type + " " + id + " to variable symbol table. Is array?: " + isArray);
-            System.out.println("Number of variables in current scope: " + symbols.size());
+      //      System.out.println("Added " + type + " " + id + " to variable symbol table. Is array?: " + isArray);
+      //      System.out.println("Number of variables in current scope: " + symbols.size());
         }
         this.type = null;
         this.id = null;
@@ -81,30 +81,30 @@ public class Variables {
     public void createNewScope() {
         Map<String,LinkedList<String>> new_scope = new HashMap<>();
         list.add(new_scope);
-        System.out.println("Created new variable scope. Current variable scope size: " + this.list.size());
+     //   System.out.println("Created new variable scope. Current variable scope size: " + this.list.size());
     }
 
     public void deleteScope() {
         if ( !list.isEmpty() ) {
             list.getFirst().clear();
             list.remove();
-            System.out.println("Deleted variable scope. Current variable scope size: " + list.size());
+     //       System.out.println("Deleted variable scope. Current variable scope size: " + list.size());
         } else {
-            System.out.println("AFNAN WHY YOU ARE TRYING TO DELETE VARIABLE SCOPE EVEN THOUGH IT'S SIZE 0?");
+   //         System.out.println("AFNAN WHY YOU ARE TRYING TO DELETE VARIABLE SCOPE EVEN THOUGH IT'S SIZE 0?");
         }
         this.variableSymbolTableTest();
     }
 
     public boolean checkArrayIndexIsNumber(String lexeme) {
         if ( !lexeme.matches("\\d+") ) {
-            System.out.println("Error: Array index should be an integer, not '" + lexeme + "'");
+      //      System.out.println("Error: Array index should be an integer, not '" + lexeme + "'");
             reject();
         }
         return true;
     }
 
     public void variableSymbolTableTest() {
-        if ( list.size() == 0 ) System.out.println("Empty variableSymbolTable");
+  //      if ( list.size() == 0 ) System.out.println("Empty variableSymbolTable");
             for(Map.Entry<String,LinkedList<String>> entry : symbols.entrySet() ) {
                 String key = entry.getKey();
                 String id = entry.getValue().getFirst();

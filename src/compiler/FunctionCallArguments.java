@@ -41,7 +41,7 @@ public class FunctionCallArguments {
     public void checkNumArgumentsEqualsNumParameters() {
         int numParameters = parameters.getNumberOfParameters();
         if ( this.numArguments != numParameters ) {
-            System.out.println("Error: The number of parameters, " + numParameters + " and number of arguments, " + this.numArguments + " do not match!");
+        //    System.out.println("Error: The number of parameters, " + numParameters + " and number of arguments, " + this.numArguments + " do not match!");
             reject();
         }
     }
@@ -54,23 +54,23 @@ public class FunctionCallArguments {
         Map<String, LinkedList<String>> new_arguments = new HashMap<>();
         list.add(new_arguments);
         ++numArguments; //TODO should we increment numArgs here or in our put() method?
-        System.out.println("Created function call scope. Current total number of arguments: " + this.numArguments);
+   //     System.out.println("Created function call scope. Current total number of arguments: " + this.numArguments);
     }
 
     public void removeFunctionCallArguments() {
         if ( !list.isEmpty() ) {
             --numArguments;
-            System.out.println("Removed function call from collection. Current number of function calls in collection: " + this.numArguments);
+   //         System.out.println("Removed function call from collection. Current number of function calls in collection: " + this.numArguments);
         }
         this.argumentsSymbolTableTest();
     }
 
     public void argumentsSymbolTableTest() {
-        if ( list.size() == 0) System.out.println("Empty functionSymbolTable");
+    //    if ( list.size() == 0) System.out.println("Empty functionSymbolTable");
         for(Map.Entry<String,LinkedList<String>> entry : arguments.entrySet() ) {
             String type = entry.getKey();
             List<String> values = entry.getValue();
-            System.out.println("ARGUMENT TYPE " + type + " VALUES: " + values.toString());
+   //         System.out.println("ARGUMENT TYPE " + type + " VALUES: " + values.toString());
         }
     }
 

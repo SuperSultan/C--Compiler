@@ -1,12 +1,9 @@
 package compiler;
 
 import java.lang.String;
-import java.util.ArrayDeque;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.List;
-import java.util.ArrayList;
 
 public class Lexer {
     private Scanner s;
@@ -44,7 +41,7 @@ public class Lexer {
         return lines;
     } //stripComments
 
-    public ArrayDeque<Token> addTokens(List<String> lines) {
+    public Queue<Token> tokenize(List<String> lines) {
 
         String keyword = "\\b(?:else|if|int|return|void|while)\\b";
         String identifier = "\\b[a-zA-Z]+\\b";
